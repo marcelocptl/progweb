@@ -22,7 +22,8 @@ public class LogRegister {
     {
         try
         {
-            this.connection =  ConnectionFactory.getConnection() ;
+            ConnectionFactory conn = ConnectionFactory.singleton();
+            this.connection =  conn.getConnection() ;
         }
         catch(SQLException e)
         {
@@ -38,7 +39,7 @@ public class LogRegister {
         return instance;
     }
     
-    public void toLog(String module, String action, String message, int userId)
+    public void toLog(String module, String action, String message, Long userId)
     {
         try
         {
@@ -49,7 +50,7 @@ public class LogRegister {
            stmt.setString(1,module);
            stmt.setString(2,action);
            stmt.setString(3,message);
-           stmt.setInt(4,userId);
+           stmt.setLong(4,userId);
            
            stmt.executeUpdate(); 
         }

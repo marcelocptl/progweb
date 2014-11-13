@@ -39,7 +39,7 @@ public class AuthenticateDao
                 user.setActive(rs.getBoolean("active"));
                 user.setProfile(rs.getInt("profile"));
            
-                user.setId(rs.getInt("id"));
+                user.setId(rs.getLong("id"));
            
                 return user;        
            }

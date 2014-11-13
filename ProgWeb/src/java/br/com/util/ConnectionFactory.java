@@ -5,26 +5,39 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- *
- * @author Vitor Mesaque
- */
-public final class ConnectionFactory {
-    private ConnectionFactory(){}
+public class ConnectionFactory {
     
-    public static Connection getConnection() throws SQLException{
+    private Connection conn;
+    
+    private static ConnectionFactory instance;
+    
+    private ConnectionFactory() throws SQLException {
+    
         try
         {
             Class.forName("org.postgresql.Driver");
             
-            Connection conn = (Connection) DriverManager.getConnection("jdbc:postgresql://localhost/webapp","postgres","postgres");
+            this.conn = (Connection) DriverManager.getConnection("jdbc:postgresql://localhost/webapp","postgres","postgres");
             
-            return conn;  
         }
         catch(Exception ex)
         {
             ex.printStackTrace();
             throw new SQLException(ex.getMessage());
-        }  
+        } 
+    
     }
+    
+    public Connection getConnection() {
+        return conn;
+    }
+    
+    public static ConnectionFactory singleton() throws SQLException {
+      
+        if (instance == null)
+         instance = new ConnectionFactory();
+      
+      return instance;
+    }    
+    
 }

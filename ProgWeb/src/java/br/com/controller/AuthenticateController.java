@@ -2,12 +2,8 @@ package br.com.controller;
 
 import br.com.business.AuthenticateBO;
 import br.com.business.PermissionBO;
-import br.com.business.ProfileBO;
-import br.com.business.UserBO;
-import br.com.model.Permission;
-import br.com.model.PermissionCollection;
-import br.com.model.Profile;
 import br.com.model.User;
+import br.com.util.LoginFacebook;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -33,35 +29,67 @@ public class AuthenticateController extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
-        String forward = LOGON;
         
-        String action = request.getParameter("action");
-
-        AuthenticateBO authenticateBo = new AuthenticateBO();
+        Message message = Message.singleton();
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
         RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
         
-        switch(action)
-        {                 
-            case "logon":
-                
-                request.setAttribute("pageContent", LOGON);
-                
-                view = request.getRequestDispatcher("/view/index/index.jsp");
+        PermissionBO permissionBo = new PermissionBO();
+        
+        LoginFacebook loginFacebook = new LoginFacebook();
+        
+        String code = request.getParameter("code");
+        
+        if (code == null || code.equals("")) {
             
-                break;
-                       
-            case "logoff":
-            
-                HttpSession session = request.getSession(true); 
+            switch(action)
+            {                 
+                case "logonFacebook":
                     
-                session.invalidate(); 
+                    response.setContentType("text/html");
 
-                break;
+                    String site = loginFacebook.getLoginRedirectURL();
+
+                    response.setStatus(response.SC_MOVED_TEMPORARILY);
+                    response.setHeader("Location", site);  
+
+                    return;
+
+                case "logoff":
+
+                    HttpSession session = request.getSession(true); 
+
+                    session.invalidate(); 
+
+                    break;
+
+                default:  
+
+                    break;
+            }
+        } else {
+            try {
+                User user = loginFacebook.obterUsuarioFacebook(code);
                 
-            default:     
-        }
+                HttpSession session = request.getSession(true); 
 
+                session.setAttribute("_user",user);
+
+                session.setAttribute("_permissions", permissionBo.getProfilePermissions(user.getProfile()));
+
+                message.addMessage("Usuário autenticado com sucesso!");
+
+                view = request.getRequestDispatcher("/view/index/index.jsp"); 
+                
+            } catch (Exception e) {
+                message.addWarning("Não foi possível se conectar!");
+            }
+        }
+        
+        request.setAttribute("message", message);
+        
         view.forward(request, response);
     }
 
@@ -69,16 +97,11 @@ public class AuthenticateController extends HttpServlet
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         User user;
-        
-        Profile profile;
-        
+                
         String action = request.getParameter("action");  
         
         AuthenticateBO authenticateBo = new AuthenticateBO();
         
-        ProfileBO profileBo = new ProfileBO();
-        
-        UserBO userBo = new UserBO();
         PermissionBO permissionBo = new PermissionBO();
         
         RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
@@ -112,6 +135,7 @@ public class AuthenticateController extends HttpServlet
                         view = request.getRequestDispatcher("/view/index/index.jsp"); 
                     }        
                     break;
+
             }             
         }
         catch (Exception ex) 
