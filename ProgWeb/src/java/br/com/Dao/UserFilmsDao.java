@@ -13,7 +13,7 @@ import java.util.ArrayList;
  *
  * @author Vitor Mesaque
  */
-public class UserFilmsDao implements GenericDao<UserFilm> {
+public class UserFilmsDao {
 
     private final Connection connection;
 
@@ -21,7 +21,6 @@ public class UserFilmsDao implements GenericDao<UserFilm> {
         this.connection = connection;
     }
 
-    @Override
     public void save(UserFilm uf) {
 
         try {
@@ -36,7 +35,6 @@ public class UserFilmsDao implements GenericDao<UserFilm> {
         }
     }
 
-    @Override
     public void update(UserFilm uf) {
 
         try {
@@ -51,7 +49,6 @@ public class UserFilmsDao implements GenericDao<UserFilm> {
         }
     }
 
-    @Override
     public UserFilm getById(int user_id) {
         try {
             String sql = "SELECT * FROM user_films WHERE id = '" + user_id + "'";
@@ -88,21 +85,6 @@ public class UserFilmsDao implements GenericDao<UserFilm> {
             e.printStackTrace();
         }
         return null;
-    }
-    
-    @Override
-    public ArrayList<UserFilm> list() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Boolean delete(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void updatePass(User uf) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private UserFilm setUserFilme(ResultSet rs) throws SQLException {
