@@ -17,7 +17,7 @@ public final class ConnectionFactory {
         {
             Class.forName("org.postgresql.Driver");
             
-            Connection conn = (Connection) DriverManager.getConnection("jdbc:postgresql://localhost/webapp","postgres","postgres");
+            Connection conn = (Connection) DriverManager.getConnection("jdbc:postgresql://localhost/webapp","postgres","root");
             
             return conn;  
         }

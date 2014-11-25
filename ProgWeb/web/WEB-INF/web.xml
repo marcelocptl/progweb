@@ -16,6 +16,10 @@
         <servlet-name>LogController</servlet-name>
         <servlet-class>br.com.controller.LogController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>FilmeController</servlet-name>
+        <servlet-class>br.com.controller.FilmeController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserController</servlet-name>
         <url-pattern>/UserController</url-pattern>
@@ -59,6 +63,10 @@
     <servlet-mapping>
         <servlet-name>LogController</servlet-name>
         <url-pattern>/LogController</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FilmeController</servlet-name>
+        <url-pattern>/FilmeController</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -49,7 +49,7 @@ public class UserFilmsDao {
         }
     }
 
-    public UserFilm getById(int user_id) {
+    public ArrayList<UserFilm> getById(int user_id) {
         try {
             String sql = "SELECT * FROM user_films WHERE id = '" + user_id + "'";
 
@@ -57,24 +57,64 @@ public class UserFilmsDao {
 
             ResultSet rs = stmt.executeQuery(sql);
 
-            if (rs.next()) {
-                return setUserFilme(rs);
+            ArrayList<UserFilm> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(setUserFilme(rs));
             }
+            return list;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public ArrayList<UserFilm> melhorarFilmes(){
+    public ArrayList<UserFilm> getFavoritos(int user_id) {
         try {
-            String sql = "SELECT imdb_id, SUM(nota) as nota_final FROM user_films GROUP BY imdb_id ORDER BY nota_final";
+            String sql = "SELECT * FROM user_films WHERE id = '" + user_id + "' AND favorito=true";
+
+            Statement stmt = this.connection.createStatement();
+
+            ResultSet rs = stmt.executeQuery(sql);
+
+            ArrayList<UserFilm> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(setUserFilme(rs));
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<UserFilm> getPretendidos(int user_id) {
+        try {
+            String sql = "SELECT * FROM user_films WHERE id = '" + user_id + "' AND assistiu=false AND pretende_ver=true";
+
+            Statement stmt = this.connection.createStatement();
+
+            ResultSet rs = stmt.executeQuery(sql);
+
+            ArrayList<UserFilm> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(setUserFilme(rs));
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<UserFilm> melhorarFilmes() {
+        try {
+            String sql = "SELECT imdb_id, SUM(nota) as nota_final FROM user_films WHERE NOTA != NULL GROUP BY imdb_id ORDER BY nota_final";
 
             Statement stmt = this.connection.createStatement();
 
             ResultSet rs = stmt.executeQuery(sql);
             ArrayList<UserFilm> list = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 UserFilm f = new UserFilm();
                 f.setImde_id(rs.getString("imdb_id"));
                 f.setNota(rs.getObject("nota", Integer.class));

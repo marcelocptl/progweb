@@ -113,7 +113,11 @@
                     <li ><a href="#">Developer by Lab. de Programação para Web</a></li>                
                 </ul>
             </div>
-        </div>    
+        </div>
+        <ul class="nav navbar-nav">
+            <li class="active"><a href="FilmesController?action=recentes">Filmes Recentes</a></li>
+            <li class="active"><a href="FilmesController?action=melhores">Melhores Filmes</a></li>
+        </ul>
     </footer>
      
     <script src="bootstrap/js/jquery.js"></script>
