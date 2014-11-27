@@ -156,7 +156,7 @@ public class UserController extends HttpServlet {
                     } 
                     else 
                     {
-                        user.setId(Integer.parseInt(id));
+                        user.setId(Long.parseLong(id));
 
                         userBo.updateUser(user);
                         
@@ -179,7 +179,7 @@ public class UserController extends HttpServlet {
                     
                     if (password.equals(confirm)) 
                     {
-                        user = new User(Integer.parseInt(id), password);
+                        user = new User(Long.parseLong(id), password);
                         
                         userBo.updatePass(user);
                         

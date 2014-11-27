@@ -119,7 +119,7 @@ public class FilmeController extends HttpServlet {
                     } 
                     else 
                     {
-                        user.setId(Integer.parseInt(id));
+                        user.setId(Long.parseLong(id));
 
                         userBo.updateUser(user);
                         

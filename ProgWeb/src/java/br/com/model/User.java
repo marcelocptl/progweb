@@ -10,7 +10,7 @@ package br.com.model;
  */
 public class User {
 
-    private int id;
+    private Long id;
     private String name;
     private String email;
     private boolean active;
@@ -19,24 +19,33 @@ public class User {
 
     public User(){}
     
-    public User(String name, String email, boolean active, String password, int id_profile) {
+    public User(Long id, String name, String email, boolean active, String password, int id_profile) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.active = active;
         this.password = password;
         this.profile = id_profile;
     }
+    
+    public User(String name, String email, boolean active, String password, int id_profile) {
+        this.name = name;
+        this.email = email;
+        this.active = active;
+        this.password = password;
+        this.profile = id_profile;
+    }    
 
-    public User(int id, String password) {
+    public User(Long id, String password) {
         this.id = id;
         this.password = password;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

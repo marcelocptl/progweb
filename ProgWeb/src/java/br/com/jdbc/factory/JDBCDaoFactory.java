@@ -18,11 +18,6 @@ import br.com.util.ConnectionFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- *
- * @author Vitor Mesaque
- */
- 
 public class JDBCDaoFactory extends DaoFactory{
 
     private Connection connection;
@@ -31,7 +26,8 @@ public class JDBCDaoFactory extends DaoFactory{
     {
         try
         {
-            this.connection =  ConnectionFactory.getConnection() ;
+            ConnectionFactory conn = ConnectionFactory.singleton();
+            this.connection =  conn.getConnection() ;
         }
         catch(SQLException e)
         {

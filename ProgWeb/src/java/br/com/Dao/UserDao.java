@@ -94,7 +94,7 @@ public class UserDao implements GenericDao<User>
                 user.setName(rs.getString("name"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("active"));
-                user.setId(rs.getInt("id"));
+                user.setId(rs.getLong("id"));
                 user.setProfile(rs.getInt("profile"));
            
                 return user;        
@@ -124,7 +124,7 @@ public class UserDao implements GenericDao<User>
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("active"));
            
-                user.setId(rs.getInt("id"));
+                user.setId(rs.getLong("id"));
            
                 return user;        
            }
@@ -155,7 +155,7 @@ public class UserDao implements GenericDao<User>
                 user.setName(rs.getString("name"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("active"));
-                user.setId(rs.getInt("id"));
+                user.setId(rs.getLong("id"));
  
                 users.add(user);
            }
