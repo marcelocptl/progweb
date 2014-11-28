@@ -17,24 +17,15 @@ public class User {
     private String password;
     private int profile;
 
-    public User(){}
-    
-    public User(Long id, String name, String email, boolean active, String password, int id_profile) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.active = active;
-        this.password = password;
-        this.profile = id_profile;
-    }
-    
+    public User() {}
+
     public User(String name, String email, boolean active, String password, int id_profile) {
         this.name = name;
         this.email = email;
         this.active = active;
         this.password = password;
         this.profile = id_profile;
-    }    
+    }
 
     public User(Long id, String password) {
         this.id = id;

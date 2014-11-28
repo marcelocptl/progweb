@@ -16,7 +16,7 @@ public class UserBO {
     public void insertUser(User user) {
         GenericDao<User> userDao = DaoFactory.getDaoFactory().getUserDao();
 
-        user.setPassword(Md5.encrypt(user.getPassword()));
+        if (user.getPassword() != null) user.setPassword(Md5.encrypt(user.getPassword()));
 
         userDao.save(user);
     }

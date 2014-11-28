@@ -10,7 +10,6 @@ import java.util.ArrayList;
  */
 public interface GenericDao<Type> {
     
-    
     public void save (Type obj);
     
     public void update (Type obj);

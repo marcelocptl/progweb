@@ -24,7 +24,10 @@ public class AuthenticateDao
     {
         try
         {
-           String sql = "SELECT * FROM userdb WHERE email = '" + email + "' AND password = '" + password + "'";
+           if (password != null) password = "= '"+ password +"'";
+           else password = "is null";
+               
+           String sql = "SELECT * FROM userdb WHERE email = '" + email + "' AND password " + password;
            
            Statement stmt = this.connection.createStatement();
            
@@ -33,13 +36,11 @@ public class AuthenticateDao
            if (rs.next()) 
            {
                 User user =  new User();
-                
                 user.setName(rs.getString("name"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("active"));
-                user.setProfile(rs.getInt("profile"));
-           
                 user.setId(rs.getLong("id"));
+                user.setProfile(rs.getInt("profile"));
            
                 return user;        
            }

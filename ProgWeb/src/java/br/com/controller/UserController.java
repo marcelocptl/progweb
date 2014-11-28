@@ -142,8 +142,8 @@ public class UserController extends HttpServlet {
 
                     boolean active = request.getParameter("active") != null ? true : false;
 
-                    int profileId = Integer.parseInt(request.getParameter("profile"));
-
+                    int profileId = Integer.parseInt(request.getParameter("profile"));                                     
+                    
                     user = new User(name, email, active, password, profileId);
 
                     if (id == null || id.isEmpty()) 

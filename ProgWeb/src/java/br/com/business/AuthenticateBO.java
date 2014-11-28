@@ -16,6 +16,8 @@ public class AuthenticateBO
     {
         AuthenticateDao authenticateDao = DaoFactory.getDaoFactory().getAuthenticateDao();
         
-        return authenticateDao.authenticate(email, Md5.encrypt(password));
+        if (password != null) password = Md5.encrypt(password);
+        
+        return authenticateDao.authenticate(email, password);
     }
 }

@@ -24,7 +24,7 @@ public class ModuleDao implements GenericDao<Module>
     }
 
     public void save(Module module) {
-
+        
         try
         {
            String sql = "INSERT INTO module (name,description,active) VALUES ('"+module.getName()+"','"+module.getDescription()+"','"+module.getActive()+"')";

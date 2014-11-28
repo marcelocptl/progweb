@@ -28,6 +28,7 @@ public class ActionDao implements GenericDao<Action> {
 
     @Override
     public void save(Action action) {
+        
         try {
             String sql = "INSERT INTO action (name,description,active) VALUES ('" + action.getName() + "','" + action.getDescription() + "','" + action.getActive() + "')";
 
