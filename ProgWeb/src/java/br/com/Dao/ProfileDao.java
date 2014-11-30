@@ -123,11 +123,11 @@ public class ProfileDao implements GenericDao<Profile>
     {
        try
         {
-           String sql = "DELETE FROM profile WHERE id = '" + id + "'";
+           String sql = "DELETE FROM profile WHERE id = " + id;
            
-           Statement stmt = this.connection.createStatement();
-           
-           stmt.executeQuery(sql); 
+            PreparedStatement stmt = this.connection.prepareStatement(sql);
+
+            stmt.executeUpdate();
            
            return true;
           

@@ -74,9 +74,6 @@
                                             </c:if>  
                                             <c:if test="${_permissions.check(_user.getProfile(), MODULE_MODULE, 'list')}">
                                             <li><a href="ModuleController?action=list">Listar Módulos</a></li>
-                                            </c:if>  
-                                            <c:if test="${_permissions.check(_user.getProfile(), PERMISSION_MODULE, 'add')}">
-                                            <li><a href="PermissionController?action=permission">Permissões</a></li>
                                             </c:if>
                                     </ul>
                                 </li>

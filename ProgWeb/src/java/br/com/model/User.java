@@ -27,6 +27,11 @@ public class User {
         this.profile = id_profile;
     }
 
+    @Override
+    public String toString() {
+        return "Usuário: "+ name + " ["+ email +"]";
+    }
+
     public User(int id, String password) {
         this.id = id;
         this.password = password;

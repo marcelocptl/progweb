@@ -9,6 +9,7 @@ import br.com.model.Action;
 import br.com.model.Permission;
 import br.com.model.PermissionCollection;
 import br.com.model.User;
+import br.com.util.LogRegister;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -28,7 +29,7 @@ public class ActionController extends HttpServlet {
     private static String LIST = "/view/action/list.jsp";
     private static String ADD = "/view/action/add.jsp";
     private static String EDIT = "/view/action/edit.jsp";
-
+    private static String DELETE = "/view/helper/delete.jsp"; 
      private static String MODULE = "Action";
     
     @Override
@@ -102,15 +103,17 @@ public class ActionController extends HttpServlet {
 
                 if (_permissions.check(_user.getProfile(), MODULE, _action)) {
 
-                    actionBo.deleteAction(Integer.parseInt(id));
+                    Action action = actionBo.getAction(Integer.parseInt(id));
 
-                    message.addMessage("Ação apagada com sucesso!");
-
-                    request.setAttribute("actions", actionBo.getAllActions());
+                    request.setAttribute("objDeleted", action);
+                    
+                    request.setAttribute("controller", this.getClass().getSimpleName());
+                    
+                    forward = DELETE;                    
 
                 } else {
                     message.addWarning("Você não tem permissão de acessar a ação [" + _action + "] no modulo [" + MODULE + "].");
-                }                 
+                }                                                 
                 
                 break;
 
@@ -129,6 +132,18 @@ public class ActionController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         Message message = Message.singleton();
+        
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");            
+        User _user = (User) request.getSession(true).getAttribute("_user");
+
+        if (_user == null) {
+
+            message.addWarning("É necessário estar logado em um usuário.");
+
+            response.sendRedirect("AuthenticateController?action=logon");
+
+            return;
+        }         
         
         Action action;
 
@@ -150,7 +165,7 @@ public class ActionController extends HttpServlet {
 
                     String description = request.getParameter("description");
 
-                    boolean active = request.getParameter("active") != null ? true : false;
+                    boolean active = request.getParameter("active") != null;
 
                     action = new Action(name, description, active);
 
@@ -158,7 +173,9 @@ public class ActionController extends HttpServlet {
                     {
                         actionBo.insertAction(action);
                         
-                        message.addMessage("Perfil adicionado com sucesso!");
+                        message.addMessage("Ação adicionada com sucesso!");
+                        
+                        LogRegister.singleton().toLog(MODULE, _action, "Ação [" + action.getName() + "] adicionada.", _user.getId());
                     } 
                     else 
                     {
@@ -166,13 +183,37 @@ public class ActionController extends HttpServlet {
 
                         actionBo.updateAction(action);
                         
-                        message.addMessage("Perfil alterado com sucesso!");
+                        message.addMessage("Ação alterada com sucesso!");
+                        
+                        LogRegister.singleton().toLog(MODULE, _action, "Ação [" + action.getName() + "] atualizada.", _user.getId());
                     }
                     request.setAttribute("actions", actionBo.getAllActions());
 
                     forward = LIST;
 
                     break;
+                    
+                case "delete":
+                    
+                    if (_permissions.check(_user.getProfile(), MODULE, _action)) {
+
+                        action = actionBo.getAction(Integer.parseInt(id));
+                        
+                        actionBo.deleteAction( action.getId() );
+
+                        message.addMessage("Ação apagada com sucesso!");
+                        
+                        LogRegister.singleton().toLog(MODULE, _action, "Ação [" + action.getName() + "] deletada.", _user.getId());
+
+                        request.setAttribute("actions", actionBo.getAllActions());
+
+                        forward = LIST;
+                        
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação [" + _action + "] no modulo [" + MODULE + "].");
+                    } 
+                    
+                    break;                    
             }
         } catch (Exception ex) {
             Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);

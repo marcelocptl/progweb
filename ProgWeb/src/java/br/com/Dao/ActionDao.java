@@ -66,9 +66,9 @@ public class ActionDao implements GenericDao<Action> {
         {
            String sql = "DELETE FROM action WHERE id = '" + id + "'";
            
-           Statement stmt = this.connection.createStatement();
-           
-           stmt.executeQuery(sql); 
+            PreparedStatement stmt = this.connection.prepareStatement(sql);
+
+            stmt.executeUpdate();
            
            return true;
           

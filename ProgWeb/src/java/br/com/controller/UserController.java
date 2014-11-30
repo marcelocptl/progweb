@@ -25,7 +25,7 @@ public class UserController extends HttpServlet {
     private static String LIST = "/view/user/list.jsp";
     private static String ADD = "/view/user/add.jsp";
     private static String EDIT = "/view/user/edit.jsp";
-    //private static String DELETE = "/view/user/delete.jsp";
+    private static String DELETE = "/view/helper/delete.jsp";
     private static String PASSWORD = "/view/user/password.jsp";
 
     private static String MODULE = "User";
@@ -104,11 +104,13 @@ public class UserController extends HttpServlet {
 
                 if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                    userBo.deleteUser(Integer.parseInt(id));
+                    user = userBo.getUser(Integer.parseInt(id));
 
-                    message.addMessage("Usuário apagado com sucesso!");
-
-                    request.setAttribute("users", userBo.getAllUsers());
+                    request.setAttribute("objDeleted", user);
+                    
+                    request.setAttribute("controller", this.getClass().getSimpleName());
+                    
+                    forward = DELETE;                    
 
                 } else {
                     message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
@@ -148,6 +150,7 @@ public class UserController extends HttpServlet {
 
         String action = request.getParameter("action");
 
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");            
         User _user = (User) request.getSession(true).getAttribute("_user");
 
         if (_user == null && !action.equals("add")) {
@@ -195,58 +198,98 @@ public class UserController extends HttpServlet {
                         active = request.getParameter("active") != null;
                         profileId = Integer.parseInt(request.getParameter("profile"));
 
-                        request.setAttribute("users", userBo.getAllUsers());
-                        forward = LIST;
                     }
 
                     user = new User(name, email, active, password, profileId);
 
-                    if (password == null || confirm == null || userBo.authenticate(email) != null
-                            || password.isEmpty() || confirm.isEmpty() || !password.equals(confirm)) {
-
-                        message.addWarning("E-MAIL já usado ou SENHA não confirmada!");
+                    if (userBo.authenticate(email) != null) {
+                    
+                        message.addWarning("O E-MAIL informado já está em uso!");
 
                     } else if (id == null || id.isEmpty()) {
 
-                        int insertId = userBo.insertUser(user);
+                        if (password == null || confirm == null || 
+                                password.isEmpty() || confirm.isEmpty() || !password.equals(confirm)) {
+                            
+                            message.addWarning("SENHA não confirmada!");
+                            
+                        } else {
+                            
+                            int insertId = userBo.insertUser(user);
 
-                        if (_user != null) {
-                            insertId = _user.getId();
+                            if (_user != null) {
+                                insertId = _user.getId();
+                            }
+
+                            LogRegister.singleton().toLog(MODULE, action, "Usuário [" + user.getName() + "] inserido.", insertId);
+
+                            message.addMessage("Cadastro realizado com sucesso!");
                         }
-
-                        LogRegister.singleton().toLog("User", action, "Usuário [" + user.getName() + "] inserido.", insertId);
-
-                        message.addMessage("Cadastro realizado com sucesso!");
-
+                        
                     } else {
                         user.setId(Integer.parseInt(id));
 
                         userBo.updateUser(user);
 
-                        LogRegister.singleton().toLog("User", action, "Usuário [" + user.getName() + "] atualizado.", _user.getId());
+                        LogRegister.singleton().toLog(MODULE, action, "Usuário [" + user.getName() + "] atualizado.", _user.getId());
 
                         message.addMessage("Usuário atualizado com sucesso!");
+                    }
+                    
+                    if (_user != null) {
+                        
+                        request.setAttribute("users", userBo.getAllUsers());
+                        forward = LIST;
+                        
                     }
 
                     break;
 
                 case "password":
 
-                    forward = PASSWORD;
+                    if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                    if (password.equals(confirm)) {
-                        user = new User(Integer.parseInt(id), password);
+                        forward = PASSWORD;
 
-                        userBo.updatePass(user);
+                        if (password.equals(confirm)) {
+                            user = new User(Integer.parseInt(id), password);
 
-                        message.addMessage("Senha alterada com sucesso!");
+                            userBo.updatePass(user);
+
+                            message.addMessage("Senha alterada com sucesso!");
+
+                            request.setAttribute("users", userBo.getAllUsers());
+
+                            forward = LIST;
+                        }
+
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                    }
+
+                    break;
+                    
+                case "delete":
+
+                    if (_permissions.check(_user.getProfile(), MODULE, action)) {
+                    
+                        user = userBo.getUser(Integer.parseInt(id));
+                        
+                        userBo.deleteUser(user.getId());
+
+                        LogRegister.singleton().toLog(MODULE, action, "Usuário [" + user.getName() + "] deletado.", _user.getId());
+                        
+                        message.addMessage("Usuário apagado com sucesso!");
 
                         request.setAttribute("users", userBo.getAllUsers());
 
                         forward = LIST;
+
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
                     }
 
-                    break;
+                    break;                    
             }
         } catch (Exception ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);

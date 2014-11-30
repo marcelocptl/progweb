@@ -191,11 +191,17 @@ public class ModuleDao implements GenericDao<Module>
     {
        try
         {
-           String sql = "DELETE FROM module WHERE id = '" + id + "'";
+            String sql = "DELETE FROM module_action WHERE module = '" + id + "'";
            
-           Statement stmt = this.connection.createStatement();
+            PreparedStatement stmt = this.connection.prepareStatement(sql);
+
+            stmt.executeUpdate();
+            
+            sql = "DELETE FROM module WHERE id = '" + id + "'";
            
-           stmt.executeQuery(sql); 
+            stmt = this.connection.prepareStatement(sql);
+
+            stmt.executeUpdate();
            
            return true;
           

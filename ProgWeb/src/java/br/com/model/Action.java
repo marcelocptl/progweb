@@ -21,6 +21,11 @@ public class Action {
         this.active = active;
     }
 
+    @Override
+    public String toString() {
+        return "Ação: "+ name;
+    }    
+    
     public int getId() {
         return id;
     }

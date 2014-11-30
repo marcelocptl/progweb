@@ -28,6 +28,11 @@ public class Module {
         this.active = active;
     }
 
+    @Override
+    public String toString() {
+        return "Módulo: "+ name;
+    }
+    
     public int getId() {
         return id;
     }

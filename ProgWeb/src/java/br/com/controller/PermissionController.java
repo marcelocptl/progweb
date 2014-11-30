@@ -26,57 +26,55 @@ public class PermissionController extends HttpServlet {
     private static String PERMISSION = "/view/permission/permission.jsp";
 
     private static String LIST = "/view/profile/list.jsp";
-    
+
     private static String MODULE = "Permission";
-    
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Message message = Message.singleton();
 
         PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
-        User _user = (User) request.getSession(true).getAttribute("_user");         
-        
-        if ( _user == null ) {
+        User _user = (User) request.getSession(true).getAttribute("_user");
+
+        if (_user == null) {
             message.addWarning("É necessário estar logado em um usuário.");
-            
+
             response.sendRedirect("AuthenticateController?action=logon");
-            
+
             return;
-        }   
-        
+        }
+
         String forward = null;
-        
-        if ( _permissions.check(_user.getProfile(), MODULE, "add") ) {
+
+        if (_permissions.check(_user.getProfile(), MODULE, "add")) {
 
             forward = PERMISSION;
 
-            try 
-            {
+            try {
+                String id = request.getParameter("id");
+
                 ProfileBO profileBo = new ProfileBO();
 
                 ModuleBO moduleBo = new ModuleBO();
 
                 PermissionBO permissionBo = new PermissionBO();
 
-                request.setAttribute("permissions", permissionBo.getAllPermissions());
+                request.setAttribute("permissions", permissionBo.getProfilePermissions(Integer.parseInt(id)));
 
-                request.setAttribute("profiles", profileBo.getAllProfiles());
+                request.setAttribute("profile", profileBo.getProfile(Integer.parseInt(id)));
 
                 request.setAttribute("modules", moduleBo.getAllModules());
 
-            } 
-            catch (Exception ex) 
-            {
+            } catch (Exception ex) {
                 Logger.getLogger(PermissionController.class.getName()).log(Level.SEVERE, null, ex);
             }
-        
+
         } else {
-            
-            message.addWarning("Você não tem permissão de acessar o modulo ["+ MODULE +"].");
-            
+
+            message.addWarning("Você não tem permissão de acessar o modulo [" + MODULE + "].");
+
         }
-        
+
         request.setAttribute("message", message);
 
         request.setAttribute("pageContent", forward);
@@ -87,52 +85,79 @@ public class PermissionController extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Message message = Message.singleton();
 
-        ProfileBO profileBo = new ProfileBO();
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");
 
-        String forward = LIST;
+        if (_user == null) {
 
-        try 
-        {
-            String[] profileModuleAction = request.getParameterValues("permissions");
-            
-            ArrayList<Permission> permissionsCollection = new ArrayList<>();
-            
-            for (String permissions : profileModuleAction)
-            {
-                String[] aux = permissions.split(";");
-                
-                Permission permission = new Permission();
-                
-                permission.setProfile(Integer.parseInt(aux[0]));
-                
-                permission.setModule(Integer.parseInt(aux[1]));
-                
-                permission.setAction(Integer.parseInt(aux[2]));
-                
-                permissionsCollection.add(permission);
-            }
+            message.addWarning("É necessário estar logado em um usuário.");
 
-            if (permissionsCollection != null) 
-            {
+            response.sendRedirect("AuthenticateController?action=logon");
+
+            return;
+
+        }
+
+        String forward = null;
+
+        if (_permissions.check(_user.getProfile(), MODULE, "add")) {
+
+            try {
+                ProfileBO profileBo = new ProfileBO();
+
                 PermissionBO permissionBo = new PermissionBO();
-                
-                permissionBo.save(permissionsCollection);
+
+                String id = request.getParameter("id");
+
+                String[] profileModuleAction = request.getParameterValues("permissions");
+
+                ArrayList<Permission> permissionsCollection = new ArrayList<>();
+
+                if (profileModuleAction == null) {
+
+                    permissionBo.delete(Integer.parseInt(id));
+
+                } else {
+
+                    for (String permissions : profileModuleAction) {
+                        String[] aux = permissions.split(";");
+
+                        Permission permission = new Permission();
+
+                        permission.setProfile(Integer.parseInt(aux[0]));
+
+                        permission.setModule(Integer.parseInt(aux[1]));
+
+                        permission.setAction(Integer.parseInt(aux[2]));
+
+                        permissionsCollection.add(permission);
+                    }
+
+                    if (permissionsCollection != null) {
+
+                        permissionBo.save(permissionsCollection, Integer.parseInt(id));
+
+                    }
+                }
+
+                request.setAttribute("profiles", profileBo.getAllProfiles());
+                forward = LIST;
+
+            } catch (Exception ex) {
+                Logger.getLogger(PermissionController.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } 
-        catch (Exception ex) 
-        {
-            Logger.getLogger(PermissionController.class.getName()).log(Level.SEVERE, null, ex);
+        } else {
+
+            message.addWarning("Você não tem permissão de acessar o modulo [" + MODULE + "].");
+
         }
 
         request.setAttribute("message", message);
 
         request.setAttribute("pageContent", forward);
-        
-        request.setAttribute("profiles", profileBo.getAllProfiles());
 
         RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 

@@ -15,12 +15,20 @@ import java.util.ArrayList;
 public class PermissionBO
 {
         
-    public void save(ArrayList<Permission> permissions )
+    public void save(ArrayList<Permission> permissions, int id)
     {
         PermissionDao permissionDao= DaoFactory.getDaoFactory().getPermissionDao();
        
-        permissionDao.save(permissions);
+        permissionDao.save(permissions, id);
     }
+    
+    public void delete(int id)
+    {
+        PermissionDao permissionDao= DaoFactory.getDaoFactory().getPermissionDao();
+       
+        permissionDao.delete(id);
+    }    
+    
     public ArrayList<Permission> getAllPermissions()
     {
         PermissionDao permissionDao = DaoFactory.getDaoFactory().getPermissionDao();

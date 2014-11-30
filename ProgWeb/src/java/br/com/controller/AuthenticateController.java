@@ -153,9 +153,12 @@ public class AuthenticateController extends HttpServlet {
             switch (action) {
                 case "logon":
 
-                    user = authenticateBo.logon(request.getParameter("email"), request.getParameter("password"));
+                    String email = request.getParameter("email");
+                    String password = request.getParameter("password");                    
+                    
+                    user = authenticateBo.logon(email, password);
 
-                    if (user == null) {
+                    if (user == null || password == null || password.isEmpty()) {
 
                         message.addWarning("Usuário ou senha incorreto!");
                         

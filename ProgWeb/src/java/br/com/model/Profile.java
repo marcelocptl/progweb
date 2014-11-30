@@ -17,8 +17,6 @@ public class Profile {
     private String description;
     
     private boolean active;
-    
-    
 
     public Profile(String name, String description, boolean active) {
         this.name = name;
@@ -26,6 +24,11 @@ public class Profile {
         this.active = active;
     }
 
+    @Override
+    public String toString() {
+        return "Perfil: "+name;
+    }    
+    
     public int getId() {
         return id;
     }

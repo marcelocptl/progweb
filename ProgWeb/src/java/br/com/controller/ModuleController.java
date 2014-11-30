@@ -7,6 +7,7 @@ import br.com.model.Module;
 import br.com.model.Permission;
 import br.com.model.PermissionCollection;
 import br.com.model.User;
+import br.com.util.LogRegister;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ public class ModuleController extends HttpServlet {
     private static String ADD = "/view/module/add.jsp";
 
     private static String EDIT = "/view/module/edit.jsp";
+
+    private static String DELETE = "/view/helper/delete.jsp";
 
     private static String MODULE = "Module";
 
@@ -94,11 +97,13 @@ public class ModuleController extends HttpServlet {
 
                 if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                    moduleBo.deleteModule(Integer.parseInt(id));
+                    Module module = moduleBo.getModule(Integer.parseInt(id));
 
-                    message.addMessage("Perfil apagado com sucesso!");
+                    request.setAttribute("objDeleted", module);
 
-                    request.setAttribute("modules", moduleBo.getAllModules());
+                    request.setAttribute("controller", this.getClass().getSimpleName());
+
+                    forward = DELETE;
 
                 } else {
                     message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
@@ -111,12 +116,12 @@ public class ModuleController extends HttpServlet {
                 if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
                     request.setAttribute("modules", moduleBo.getAllModules());
-                    
+
                     forward = LIST;
 
                 } else {
                     message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
-                }                
+                }
 
                 break;
 
@@ -135,9 +140,21 @@ public class ModuleController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Message message = Message.singleton();
 
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");
+
+        if (_user == null) {
+
+            message.addWarning("É necessário estar logado em um usuário.");
+
+            response.sendRedirect("AuthenticateController?action=logon");
+
+            return;
+        }
+
         Module module;
 
-        String forward = "";
+        String forward = null;
 
         String action = request.getParameter("action");
 
@@ -152,40 +169,72 @@ public class ModuleController extends HttpServlet {
                 case "add":
                 case "edit":
 
-                    String name = request.getParameter("name");
+                    if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                    String description = request.getParameter("description");
+                        String name = request.getParameter("name");
 
-                    ArrayList<Action> moduleActions = new ArrayList<>();
+                        String description = request.getParameter("description");
 
-                    String[] actionsSelected;
+                        ArrayList<Action> moduleActions = new ArrayList<>();
 
-                    actionsSelected = request.getParameterValues("actions");
+                        String[] actionsSelected;
 
-                    boolean active = request.getParameter("active") != null ? true : false;
+                        actionsSelected = request.getParameterValues("actions");
 
-                    module = new Module(name, description, active);
+                        boolean active = request.getParameter("active") != null ? true : false;
 
-                    for (String actionId : actionsSelected) {
-                        moduleActions.add(actionBo.getAction(Integer.parseInt(actionId)));
-                    }
+                        module = new Module(name, description, active);
 
-                    module.setActions(moduleActions);
+                        for (String actionId : actionsSelected) {
+                            moduleActions.add(actionBo.getAction(Integer.parseInt(actionId)));
+                        }
 
-                    if (id == null || id.isEmpty()) {
-                        moduleBo.insertModule(module);
+                        module.setActions(moduleActions);
 
-                        message.addMessage("Perfil adicionado com sucesso!");
+                        if (id == null || id.isEmpty()) {
+                            moduleBo.insertModule(module);
+
+                            message.addMessage("Módulo adicionado com sucesso!");
+                            
+                            LogRegister.singleton().toLog(MODULE, action, "Módulo [" + module.getName() + "] adicionado.", _user.getId());
+                            
+                        } else {
+                            module.setId(Integer.parseInt(id));
+
+                            moduleBo.updateModule(module);
+
+                            message.addMessage("Módulo atualizado com sucesso!");
+                            
+                            LogRegister.singleton().toLog(MODULE, action, "Módulo [" + module.getName() + "] atualizado.", _user.getId());
+                        }
+                        request.setAttribute("modules", moduleBo.getAllModules());
+
+                        forward = LIST;
+
                     } else {
-                        module.setId(Integer.parseInt(id));
-
-                        moduleBo.updateModule(module);
-
-                        message.addMessage("Perfil atualizado com sucesso!");
+                        message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
                     }
-                    request.setAttribute("modules", moduleBo.getAllModules());
 
-                    forward = LIST;
+                    break;
+
+                case "delete":
+
+                    if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                        module = moduleBo.getModule(Integer.parseInt(id));
+                        
+                        moduleBo.deleteModule( module.getId() );
+
+                        message.addMessage("Módulo apagado com sucesso!");
+                        
+                        LogRegister.singleton().toLog(MODULE, action, "Módulo [" + module.getName() + "] deletado.", _user.getId());
+
+                        request.setAttribute("modules", moduleBo.getAllModules());
+                        forward = LIST;
+
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                    }
 
                     break;
             }

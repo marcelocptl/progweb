@@ -6,6 +6,7 @@ import br.com.model.Permission;
 import br.com.model.PermissionCollection;
 import br.com.model.Profile;
 import br.com.model.User;
+import br.com.util.LogRegister;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -28,6 +29,8 @@ public class ProfileController extends HttpServlet
     private static String ADD  = "/view/profile/add.jsp";
     
     private static String EDIT  = "/view/profile/edit.jsp";
+    
+    private static String DELETE = "/view/helper/delete.jsp";    
     
     private static String PERMISSION  = "/view/profile/permission.jsp";
     
@@ -56,8 +59,6 @@ public class ProfileController extends HttpServlet
         String id = request.getParameter("id");
         
         ProfileBO profileBo = new ProfileBO();
-        
-        ModuleBO moduleBo = new ModuleBO();
         
         Profile profile;       
         
@@ -95,15 +96,17 @@ public class ProfileController extends HttpServlet
 
                 if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                    profileBo.deleteProfile(Integer.parseInt(id));
+                    profile = profileBo.getProfile(Integer.parseInt(id));
 
-                    message.addMessage("Perfil apagado com sucesso!");
-
-                    request.setAttribute("profiles", profileBo.getAllProfiles());
+                    request.setAttribute("objDeleted", profile);
+                    
+                    request.setAttribute("controller", this.getClass().getSimpleName());
+                    
+                    forward = DELETE;                    
 
                 } else {
-                    message.addWarning("Você não tem permissão de acessar a ação ["+ action +"] no modulo ["+ MODULE +"].");
-                }               
+                    message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                }                          
                
                 break;
 
@@ -136,9 +139,21 @@ public class ProfileController extends HttpServlet
     {
         Message message = Message.singleton();
          
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");            
+        User _user = (User) request.getSession(true).getAttribute("_user");
+
+        if (_user == null) {
+
+            message.addWarning("É necessário estar logado em um usuário.");
+
+            response.sendRedirect("AuthenticateController?action=logon");
+
+            return;
+        }                
+        
         Profile profile;
         
-        String forward="";
+        String forward=null;
         
         String action = request.getParameter("action");  
         
@@ -153,32 +168,64 @@ public class ProfileController extends HttpServlet
                 case "add":
                 case "edit":
                     
-                    String name = request.getParameter("name");
-                     
-                    String description = request.getParameter("description");
-                    
-                    boolean active = request.getParameter("active") != null;
-                    
-                    profile = new Profile(name, description, active);
-                    
-                    if(id == null || id.isEmpty())
-                    {
-                        profileBo.insertProfile(profile);
-                        
-                        message.addMessage("Perfil adicionado com sucesso!");
-                    }
-                    else
-                    {
-                        profile.setId(Integer.parseInt(id));
-                        
-                        profileBo.updateProfile(profile);
-                        
-                        message.addMessage("Perfil atualizado com sucesso!");
-                    }
-                    request.setAttribute("profiles", profileBo.getAllProfiles());
-                    
-                    forward = LIST;
+                    if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                        String name = request.getParameter("name");
+
+                        String description = request.getParameter("description");
+
+                        boolean active = request.getParameter("active") != null;
+
+                        profile = new Profile(name, description, active);
+
+                        if(id == null || id.isEmpty())
+                        {
+                            profileBo.insertProfile(profile);
+
+                            message.addMessage("Perfil adicionado com sucesso!");
                             
+                            LogRegister.singleton().toLog(MODULE, action, "Perfil [" + profile.getName() + "] adicionado.", _user.getId());
+                        }
+                        else
+                        {
+                            profile.setId(Integer.parseInt(id));
+
+                            profileBo.updateProfile(profile);
+
+                            message.addMessage("Perfil atualizado com sucesso!");
+                            
+                            LogRegister.singleton().toLog(MODULE, action, "Perfil [" + profile.getName() + "] atualizado.", _user.getId());
+                        }
+                        request.setAttribute("profiles", profileBo.getAllProfiles());
+
+                        forward = LIST;
+
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação ["+ action +"] no modulo ["+ MODULE +"].");
+                    }                                        
+                            
+                    break;
+                    
+                case "delete":
+                    
+                    if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                        profile = profileBo.getProfile(Integer.parseInt(id));
+                        
+                        profileBo.deleteProfile(profile.getId());
+
+                        message.addMessage("Perfil apagado com sucesso!");
+
+                        LogRegister.singleton().toLog(MODULE, action, "Perfil [" + profile.getName() + "] adicionado.", _user.getId());
+                        
+                        request.setAttribute("profiles", profileBo.getAllProfiles());
+                        
+                        forward = LIST;
+                        
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação ["+ action +"] no modulo ["+ MODULE +"].");
+                    } 
+                    
                     break;
             }             
         }

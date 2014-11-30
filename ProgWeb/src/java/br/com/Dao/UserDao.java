@@ -69,9 +69,9 @@ public class UserDao implements GenericDao<User> {
         try {
             String sql = "DELETE FROM userdb WHERE id = '" + id + "'";
 
-            Statement stmt = this.connection.createStatement();
+            PreparedStatement stmt = this.connection.prepareStatement(sql);
 
-            stmt.executeQuery(sql);
+            stmt.executeUpdate();
 
             return true;
 

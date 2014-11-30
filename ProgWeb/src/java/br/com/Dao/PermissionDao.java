@@ -28,19 +28,16 @@ public class PermissionDao {
         this.connection = connection;
     }
 
-    public void save(ArrayList<Permission> permissions) {
+    public void save(ArrayList<Permission> permissions, int id) {
         try {
-            String sql = "delete from profile_module_action;";
-
-            PreparedStatement stmt = this.connection.prepareStatement(sql);
-
-            stmt.executeUpdate();
+            
+            this.delete(id);
 
             for (int i = 0; i < permissions.size(); i++) 
             {
-                sql = "INSERT INTO profile_module_action (profile, module, action) VALUES ("+permissions.get(i).getProfile()+","+ permissions.get(i).getModule()+","+permissions.get(i).getAction()+");";
+                String sql = "INSERT INTO profile_module_action (profile, module, action) VALUES ("+permissions.get(i).getProfile()+","+ permissions.get(i).getModule()+","+permissions.get(i).getAction()+");";
 
-                stmt = this.connection.prepareStatement(sql);
+                PreparedStatement stmt = this.connection.prepareStatement(sql);
 
                 stmt.executeUpdate();
             }
@@ -50,6 +47,21 @@ public class PermissionDao {
             e.printStackTrace();
         }
     }
+    
+    public void delete(int id) {
+        try {
+            
+            String sql = "DELETE FROM profile_module_action WHERE profile = "+ id;
+
+            PreparedStatement stmt = this.connection.prepareStatement(sql);
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public ArrayList<Permission> list() {
 
         try

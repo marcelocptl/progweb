@@ -4,42 +4,39 @@
 
 <section>
     <div class="page-header">
-        <h1>Configurar Permissões</h1>
+        <h1>Configurar Permissões - <small> ${profile.getName()} </small></h1>
     </div>
-    <form class="form-horizontal" action="PermissionController" method="post">
+    <form class="form-horizontal" action="PermissionController?id=${profile.getId()}" method="post">
         <div class="form-group">
-            <ul>
-                <c:forEach items="${profiles}" var="profile">
-                    <li>
-                        <input type="checkbox" name="permissions"> ${profile.getName()} 
-                        <ul>
-                            <c:forEach items="${modules}" var="module">
-                                <li>
-                                    <input type="checkbox" name="permissions"> ${module.getName()}
-                                    <ul>
-                                        <c:forEach items="${module.getActions()}" var="action">
-                                            <li>
-                                                <label class="checkbox">
-                                                    <input type="checkbox" name="permissions" value="${profile.getId()};${module.getId()};${action.getId()}"  
-                                                           <c:if test="${permissions.check(profile.getId(), module.getName(), action.getName())}"> 
-                                                               checked="checked"
-                                                           </c:if>
-                                                           > ${action.getName()}
-                                                </label>
-                                            </li>
-                                        </c:forEach>
-                                    </ul>
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </li>
+            <div class="row">
+                <c:forEach items="${modules}" var="module">
+                    <div class="col-lg-4">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"> ${module.getName()} </h3>
+                            </div>
+                            <div class="panel-body">
+                                <ul>
+                                    <c:forEach items="${module.getActions()}" var="action">
+                                        <li>
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="permissions" value="${profile.getId()};${module.getId()};${action.getId()}"  
+                                                       <c:if test="${permissions.check(profile.getId(), module.getName(), action.getName())}"> 
+                                                           checked="checked"
+                                                       </c:if>
+                                                       > ${action.getName()}
+                                            </label>
+                                        </li>
+                                    </c:forEach>
+                                </ul>
+                            </div>
+                        </div>            
+                    </div>
                 </c:forEach>
-            </ul>
+            </div>
         </div>        
         <div class="form-group">
-            <div class="col-lg-offset-2 col-lg-10">
-                <button type="submit" class="btn btn-default" name="save">Salvar</button>
-            </div>
+            <button type="submit" class="btn btn-default" name="save">Salvar</button>
         </div>
     </form>
 </section>    
