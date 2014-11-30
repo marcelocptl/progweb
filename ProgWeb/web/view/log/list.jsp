@@ -2,35 +2,33 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 
-<div class="page-header">
-    <ul class="breadcrumb">
-        <li><a href="#">Sistema de Log</a> <span class="divider"></span></li>
-        <li class="active">Log</li>
-    </ul>
+<section>
+    <div class="page-header">
+        <h1>Registro de Log</h1>
+    </div>
 
-    <h1>Registro de Log</h1>
-</div>
-
-<table class="table table-hover">
-    <thead>
-        <tr>
-            
-            <th>Profile</th>
-            <th>Módulo</th>
-            <th>Ação</th>
-        </tr>
-    </thead>
-    <tbody>
-
-        <c:forEach items="${logs}" var="log">
+    <table class="table table-hover">
+        <thead>
             <tr>
-                <td><c:out value="${log.getDate()}" /></td>
-                <td><c:out value="${log.getModule()}" /></td>
-                <td><c:out value="${log.getAction()}" /></td>
-                <td><c:out value="${log.getUser().getName()}" /></td>                
-                
+                <th>Data</th>
+                <th>Módulo</th>
+                <th>Ação</th>
+                <th>Usuário</th>
+                <th>Mensagem</th>
             </tr>
-        </c:forEach>
+        </thead>
+        <tbody>
 
-    </tbody>
-</table>
+            <c:forEach items="${logs}" var="log">
+                <tr>
+                    <td><c:out value="${log.getDate()}" /></td>
+                    <td><c:out value="${log.getModule()}" /></td>
+                    <td><c:out value="${log.getAction()}" /></td>
+                    <td><c:out value="${log.getUser().getName()}" /></td>                
+                    <td><c:out value="${log.getMessage()}" /></td> 
+                </tr>
+            </c:forEach>
+
+        </tbody>
+    </table>
+</section>    

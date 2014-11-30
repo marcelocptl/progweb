@@ -2,7 +2,10 @@ package br.com.controller;
 
 import br.com.business.ModuleBO;
 import br.com.business.ProfileBO;
+import br.com.model.Permission;
+import br.com.model.PermissionCollection;
 import br.com.model.Profile;
+import br.com.model.User;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -27,13 +30,26 @@ public class ProfileController extends HttpServlet
     private static String EDIT  = "/view/profile/edit.jsp";
     
     private static String PERMISSION  = "/view/profile/permission.jsp";
+    
+    private static String MODULE = "Profile";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         Message message = Message.singleton();
         
-        String forward = LIST;
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");         
+        
+        if ( _user == null ) {
+            message.addWarning("É necessário estar logado em um usuário.");
+            
+            response.sendRedirect("AuthenticateController?action=logon");
+            
+            return;
+        }         
+        
+        String forward = null;
         
         String action = request.getParameter("action");
 
@@ -43,52 +59,74 @@ public class ProfileController extends HttpServlet
         
         ModuleBO moduleBo = new ModuleBO();
         
-        Profile profile;
+        Profile profile;       
         
         switch(action)
         {                 
             case "add":
                 
-                forward = ADD;
-            
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                    forward = ADD;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação ["+ action +"] no modulo ["+ MODULE +"].");
+                }                
+                
                 break;
                        
               case "edit":
 
-                profile = profileBo.getProfile(Integer.parseInt(id)); 
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                request.setAttribute("profile", profile); 
-                
-                forward = EDIT;
+                    profile = profileBo.getProfile(Integer.parseInt(id)); 
+
+                    request.setAttribute("profile", profile); 
+
+                    forward = EDIT;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação ["+ action +"] no modulo ["+ MODULE +"].");
+                }                  
                 
                 break;
 
            case "delete":
 
-                profileBo.deleteProfile(Integer.parseInt(id));
-                
-                message.addMessage("Perfil apagado com sucesso!");
-                
-                request.setAttribute("profiles", profileBo.getAllProfiles());
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
+                    profileBo.deleteProfile(Integer.parseInt(id));
+
+                    message.addMessage("Perfil apagado com sucesso!");
+
+                    request.setAttribute("profiles", profileBo.getAllProfiles());
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação ["+ action +"] no modulo ["+ MODULE +"].");
+                }               
+               
                 break;
 
             case "list":
             
-                request.setAttribute("profiles", profileBo.getAllProfiles());
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                    request.setAttribute("profiles", profileBo.getAllProfiles());
+                    forward = LIST;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação ["+ action +"] no modulo ["+ MODULE +"].");
+                }
                 
                 break;
-                
-            default:
-                
-                forward = ADD;    
+                    
         }
 
         request.setAttribute("message", message);
         
         request.setAttribute("pageContent", forward);
         
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
          
         view.forward(request, response);
     }
@@ -119,7 +157,7 @@ public class ProfileController extends HttpServlet
                      
                     String description = request.getParameter("description");
                     
-                    boolean active = request.getParameter("active") != null ? true : false;
+                    boolean active = request.getParameter("active") != null;
                     
                     profile = new Profile(name, description, active);
                     
@@ -153,7 +191,7 @@ public class ProfileController extends HttpServlet
         
         request.setAttribute("pageContent", forward);
         
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
         
         view.forward(request, response); 
     } 

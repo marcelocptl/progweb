@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 public interface GenericDao<Type> {
     
-    public void save (Type obj);
+    public int save (Type obj);
     
     public void update (Type obj);
     
@@ -22,5 +22,7 @@ public interface GenericDao<Type> {
 
     public void updatePass(User user);
 
+    public User authenticate(String email);
+    
 }
 

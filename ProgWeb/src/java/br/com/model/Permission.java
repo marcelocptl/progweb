@@ -1,18 +1,17 @@
-
 package br.com.model;
 
 /**
  *
  * @author vitor
  */
-public class Permission 
-{
+public class Permission {
+
     private int profile;
     private String profileName;
-    
+
     private int module;
     private String moduleName;
-    
+
     private int action;
     private String actionName;
 
@@ -38,7 +37,7 @@ public class Permission
 
     public void setAction(int action) {
         this.action = action;
-    }  
+    }
 
     public String getProfileName() {
         return profileName;
@@ -62,14 +61,15 @@ public class Permission
 
     public void setActionName(String actionName) {
         this.actionName = actionName;
-    }       
-    
+    }
+
     @Override
-    public boolean equals(Object o)
-    {
-        Permission permission = (Permission)o;        
-        
+    public boolean equals(Object o) {
+
+        Permission permission = (Permission) o;
+
         return this.getProfile() == permission.getProfile() && this.getModuleName().equals(permission.getModuleName()) && this.getActionName().equals(permission.getActionName());
 
-     }
+    }
+
 }

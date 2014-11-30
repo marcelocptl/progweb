@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class PermissionCollection<Type> extends ArrayList<Type>{
     
     public boolean check(int profile, String module, String action)
-    {
+    {            
         Permission permission = new Permission();
         
         permission.setProfile(profile);

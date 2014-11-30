@@ -2,9 +2,10 @@ package br.com.controller;
 
 import br.com.business.ProfileBO;
 import br.com.business.UserBO;
+import br.com.model.Permission;
+import br.com.model.PermissionCollection;
 import br.com.model.User;
 import br.com.util.LogRegister;
-import br.com.util.Md5;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -14,7 +15,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -25,113 +25,154 @@ public class UserController extends HttpServlet {
     private static String LIST = "/view/user/list.jsp";
     private static String ADD = "/view/user/add.jsp";
     private static String EDIT = "/view/user/edit.jsp";
-    private static String DELETE = "/view/user/delete.jsp";
+    //private static String DELETE = "/view/user/delete.jsp";
     private static String PASSWORD = "/view/user/password.jsp";
 
+    private static String MODULE = "User";
+
+    private static int PROFILE_USER = 9;
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Message message = Message.singleton();
-        
+
+        String action = request.getParameter("action");
+
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");
+
+        if (_user == null && !action.equals("add")) {
+            message.addWarning("É necessário estar logado em um usuário.");
+
+            response.sendRedirect("AuthenticateController?action=logon");
+
+            return;
+        }
+
         UserBO userBo = new UserBO();
 
         ProfileBO profileBo = new ProfileBO();
 
         User user;
-        
-        String forward = LIST;
 
-        String action = request.getParameter("action");
+        String forward = null;
 
         String id = request.getParameter("id");
 
-        switch (action) 
-        {
+        switch (action) {
             case "add":
 
-                request.setAttribute("profiles", profileBo.getAllProfiles());
-
                 forward = ADD;
+
+                if (_permissions != null && _permissions.check(_user.getProfile(), MODULE, action)) {
+                    request.setAttribute("profiles", profileBo.getAllProfiles());
+                }
 
                 break;
 
             case "edit":
 
-                user = userBo.getUser(Integer.parseInt(id));
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
+                    user = userBo.getUser(Integer.parseInt(id));
 
-                request.setAttribute("user", user);
+                    request.setAttribute("user", user);
 
-                request.setAttribute("profiles", profileBo.getAllProfiles());
+                    request.setAttribute("profiles", profileBo.getAllProfiles());
 
-                forward = EDIT;
+                    forward = EDIT;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                }
 
                 break;
 
             case "list":
 
-                request.setAttribute("users", userBo.getAllUsers());
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                    request.setAttribute("users", userBo.getAllUsers());
+                    forward = LIST;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                }
 
                 break;
 
             case "delete":
 
-                userBo.deleteUser(Integer.parseInt(id));
-                
-                message.addMessage("Usuário apagado com sucesso!");
-                
-                request.setAttribute("users", userBo.getAllUsers());
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                    userBo.deleteUser(Integer.parseInt(id));
+
+                    message.addMessage("Usuário apagado com sucesso!");
+
+                    request.setAttribute("users", userBo.getAllUsers());
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                }
 
                 break;
 
             case "password":
 
-                user = userBo.getUser(Integer.parseInt(id));
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                request.setAttribute("user", user);
+                    user = userBo.getUser(Integer.parseInt(id));
 
-                forward = PASSWORD;
+                    request.setAttribute("user", user);
+
+                    forward = PASSWORD;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                }
 
                 break;
-
-            default:
-
-                forward = ADD;
         }
 
         request.setAttribute("message", message);
-        
+
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Message message = Message.singleton();
-        
-        User user;
-
-        String forward = "";
 
         String action = request.getParameter("action");
+
+        User _user = (User) request.getSession(true).getAttribute("_user");
+
+        if (_user == null && !action.equals("add")) {
+
+            message.addWarning("É necessário estar logado em um usuário.");
+
+            response.sendRedirect("AuthenticateController?action=logon");
+
+            return;
+        }
+
+        User user;
+
+        String forward = ADD;
 
         String id = request.getParameter("id");
 
         UserBO userBo = new UserBO();
 
         String password = request.getParameter("password");
-                    
-        HttpSession session = request.getSession(true);
-        
-        User _user = (User) session.getAttribute("_user");
-        
-        try 
-        {
-            switch (action) 
-            {
+
+        String confirm = request.getParameter("confirm");
+
+        try {
+            switch (action) {
                 case "add":
 
                 case "edit":
@@ -140,69 +181,82 @@ public class UserController extends HttpServlet {
 
                     String email = request.getParameter("email");
 
-                    boolean active = request.getParameter("active") != null ? true : false;
+                    boolean active;
 
-                    int profileId = Integer.parseInt(request.getParameter("profile"));                                     
-                    
-                    user = new User(name, email, active, password, profileId);
+                    int profileId;
 
-                    if (id == null || id.isEmpty()) 
-                    {
-                        userBo.insertUser(user);
-                        
-                        LogRegister.singleton().toLog("User", action, "Usuário ["+ user.getName()+"] inserido.", _user.getId());
-                        
-                        message.addMessage("Usuário adicionado com sucesso!");
-                    } 
-                    else 
-                    {
-                        user.setId(Long.parseLong(id));
+                    if (_user == null) {
 
-                        userBo.updateUser(user);
-                        
-                        LogRegister.singleton().toLog("User", action, "Usuário ["+ user.getName()+"] atualizado.", _user.getId());
-                        
-                        message.addMessage("Usuário atualizado com sucesso!");
+                        active = true;
+                        profileId = PROFILE_USER;
+
+                    } else {
+
+                        active = request.getParameter("active") != null;
+                        profileId = Integer.parseInt(request.getParameter("profile"));
+
+                        request.setAttribute("users", userBo.getAllUsers());
+                        forward = LIST;
                     }
 
-                    request.setAttribute("users", userBo.getAllUsers());
+                    user = new User(name, email, active, password, profileId);
 
-                    forward = LIST;
+                    if (password == null || confirm == null || userBo.authenticate(email) != null
+                            || password.isEmpty() || confirm.isEmpty() || !password.equals(confirm)) {
+
+                        message.addWarning("E-MAIL já usado ou SENHA não confirmada!");
+
+                    } else if (id == null || id.isEmpty()) {
+
+                        int insertId = userBo.insertUser(user);
+
+                        if (_user != null) {
+                            insertId = _user.getId();
+                        }
+
+                        LogRegister.singleton().toLog("User", action, "Usuário [" + user.getName() + "] inserido.", insertId);
+
+                        message.addMessage("Cadastro realizado com sucesso!");
+
+                    } else {
+                        user.setId(Integer.parseInt(id));
+
+                        userBo.updateUser(user);
+
+                        LogRegister.singleton().toLog("User", action, "Usuário [" + user.getName() + "] atualizado.", _user.getId());
+
+                        message.addMessage("Usuário atualizado com sucesso!");
+                    }
 
                     break;
 
                 case "password":
-                    
-                    String confirm = request.getParameter("confirm");
-                    
+
                     forward = PASSWORD;
-                    
-                    if (password.equals(confirm)) 
-                    {
-                        user = new User(Long.parseLong(id), password);
-                        
+
+                    if (password.equals(confirm)) {
+                        user = new User(Integer.parseInt(id), password);
+
                         userBo.updatePass(user);
-                        
+
                         message.addMessage("Senha alterada com sucesso!");
-                        
+
                         request.setAttribute("users", userBo.getAllUsers());
-                        
+
                         forward = LIST;
                     }
-                    
+
                     break;
             }
-        } 
-        catch (Exception ex) 
-        {
+        } catch (Exception ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         request.setAttribute("message", message);
-        
+
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }

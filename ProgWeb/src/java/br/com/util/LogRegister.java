@@ -39,7 +39,7 @@ public class LogRegister {
         return instance;
     }
     
-    public void toLog(String module, String action, String message, Long userId)
+    public void toLog(String module, String action, String message, int userId)
     {
         try
         {

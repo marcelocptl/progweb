@@ -4,6 +4,7 @@ import br.com.business.AuthenticateBO;
 import br.com.business.PermissionBO;
 import br.com.business.UserBO;
 import br.com.model.User;
+import br.com.util.LogRegister;
 import br.com.util.LoginFacebook;
 import br.com.util.Message;
 import java.io.IOException;
@@ -22,18 +23,24 @@ import javax.servlet.http.HttpSession;
  */
 public class AuthenticateController extends HttpServlet {
 
-    private static String LOGOFF = "/index.jsp";
-
-    private static String LOGON = "/view/index/home.jsp";
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         Message message = Message.singleton();
 
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-
         RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        if (request.getSession(true).getAttribute("_user") != null && !action.equals("logoff")) {
+            message.addWarning("Você já está logado. Faça logoff!");
+
+            request.setAttribute("message", message);
+
+            view.forward(request, response);
+
+            return;
+        }
 
         PermissionBO permissionBo = new PermissionBO();
 
@@ -48,6 +55,13 @@ public class AuthenticateController extends HttpServlet {
         if (code == null || code.equals("")) {
 
             switch (action) {
+                
+                case "logon":
+                
+                    request.setAttribute("pageContent", "/login.jsp");
+                    
+                    break;
+                    
                 case "logonFacebook":
 
                     response.setContentType("text/html");
@@ -80,9 +94,22 @@ public class AuthenticateController extends HttpServlet {
                 
                 if (authenticateUser == null ) {
                     
-                    userBO.insertUser(user);
-                    
-                    user = authenticateBo.logon( user.getEmail() , user.getPassword() );                    
+                    if (userBO.authenticate( user.getEmail() ) == null) {
+                        
+                        user.setId( userBO.insertUser(user) );
+                        
+                        LogRegister.singleton().toLog("User", "add", "Usuário do Facebook [" + user.getName() + "] inserido.", user.getId());
+                        
+                    } else {
+                        
+                        message.addWarning("Seu e-mail usado no facebook já existe no nosso sistema.");
+
+                        response.sendRedirect("UserController?action=add");
+
+                        return;
+                        
+                    }
+                        
                     
                 } else {
                     
@@ -97,8 +124,6 @@ public class AuthenticateController extends HttpServlet {
                 session.setAttribute("_permissions", permissionBo.getProfilePermissions(user.getProfile()));
 
                 message.addMessage("Facebook autenticado com sucesso!");
-
-                view = request.getRequestDispatcher("/view/index/index.jsp");
             
             } catch (Exception e) {
                 message.addWarning("Não foi possível conectar com o facebook!");
@@ -131,9 +156,11 @@ public class AuthenticateController extends HttpServlet {
                     user = authenticateBo.logon(request.getParameter("email"), request.getParameter("password"));
 
                     if (user == null) {
-                        view = request.getRequestDispatcher("index.jsp");
 
                         message.addWarning("Usuário ou senha incorreto!");
+                        
+                        request.setAttribute("pageContent", "/login.jsp");
+                        
                     } else {
                         HttpSession session = request.getSession(true);
 
@@ -143,7 +170,6 @@ public class AuthenticateController extends HttpServlet {
 
                         message.addMessage("Usuário autenticado com sucesso!");
 
-                        view = request.getRequestDispatcher("/view/index/index.jsp");
                     }
                     break;
 

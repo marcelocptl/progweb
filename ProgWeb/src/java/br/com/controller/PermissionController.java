@@ -4,6 +4,8 @@ import br.com.business.ModuleBO;
 import br.com.business.PermissionBO;
 import br.com.business.ProfileBO;
 import br.com.model.Permission;
+import br.com.model.PermissionCollection;
+import br.com.model.User;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,38 +27,61 @@ public class PermissionController extends HttpServlet {
 
     private static String LIST = "/view/profile/list.jsp";
     
+    private static String MODULE = "Permission";
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         Message message = Message.singleton();
 
-        String forward = PERMISSION;
-
-        try 
-        {
-            ProfileBO profileBo = new ProfileBO();
-
-            ModuleBO moduleBo = new ModuleBO();
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");         
+        
+        if ( _user == null ) {
+            message.addWarning("É necessário estar logado em um usuário.");
             
-            PermissionBO permissionBo = new PermissionBO();
-
-            request.setAttribute("permissions", permissionBo.getAllPermissions());
+            response.sendRedirect("AuthenticateController?action=logon");
             
-            request.setAttribute("profiles", profileBo.getAllProfiles());
+            return;
+        }   
+        
+        String forward = null;
+        
+        if ( _permissions.check(_user.getProfile(), MODULE, "add") ) {
 
-            request.setAttribute("modules", moduleBo.getAllModules());
+            forward = PERMISSION;
 
-        } 
-        catch (Exception ex) 
-        {
-            Logger.getLogger(PermissionController.class.getName()).log(Level.SEVERE, null, ex);
+            try 
+            {
+                ProfileBO profileBo = new ProfileBO();
+
+                ModuleBO moduleBo = new ModuleBO();
+
+                PermissionBO permissionBo = new PermissionBO();
+
+                request.setAttribute("permissions", permissionBo.getAllPermissions());
+
+                request.setAttribute("profiles", profileBo.getAllProfiles());
+
+                request.setAttribute("modules", moduleBo.getAllModules());
+
+            } 
+            catch (Exception ex) 
+            {
+                Logger.getLogger(PermissionController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        
+        } else {
+            
+            message.addWarning("Você não tem permissão de acessar o modulo ["+ MODULE +"].");
+            
         }
-
+        
         request.setAttribute("message", message);
 
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }
@@ -109,7 +134,7 @@ public class PermissionController extends HttpServlet {
         
         request.setAttribute("profiles", profileBo.getAllProfiles());
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }

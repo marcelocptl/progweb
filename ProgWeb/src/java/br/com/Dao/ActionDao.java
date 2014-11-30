@@ -27,7 +27,7 @@ public class ActionDao implements GenericDao<Action> {
     }
 
     @Override
-    public void save(Action action) {
+    public int save(Action action) {
         
         try {
             String sql = "INSERT INTO action (name,description,active) VALUES ('" + action.getName() + "','" + action.getDescription() + "','" + action.getActive() + "')";
@@ -39,6 +39,8 @@ public class ActionDao implements GenericDao<Action> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
+        return -1;
     }
 
     @Override
@@ -81,7 +83,7 @@ public class ActionDao implements GenericDao<Action> {
     @Override
     public ArrayList<Action> list() {
         try {
-            String sql = "SELECT * FROM action";
+            String sql = "SELECT * FROM action ORDER BY id";
 
             Statement stmt = this.connection.createStatement();
 
@@ -136,4 +138,9 @@ public class ActionDao implements GenericDao<Action> {
     public void updatePass(User user) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    @Override
+    public User authenticate(String email){
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }    
 }

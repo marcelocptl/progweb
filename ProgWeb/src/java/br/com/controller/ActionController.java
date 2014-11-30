@@ -6,6 +6,9 @@ package br.com.controller;
 
 import br.com.business.ActionBO;
 import br.com.model.Action;
+import br.com.model.Permission;
+import br.com.model.PermissionCollection;
+import br.com.model.User;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -26,63 +29,98 @@ public class ActionController extends HttpServlet {
     private static String ADD = "/view/action/add.jsp";
     private static String EDIT = "/view/action/edit.jsp";
 
+     private static String MODULE = "Action";
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         Message message = Message.singleton();
-         
-        String forward = LIST;
+        
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");         
+        
+        if ( _user == null ) {
+            message.addWarning("É necessário estar logado em um usuário.");
+            
+            response.sendRedirect("AuthenticateController?action=logon");
+            
+            return;
+        }         
+        
+        String forward = null;
 
         String _action = request.getParameter("action");
-
+        
         String id = request.getParameter("id");
 
-        ActionBO actionBo = new ActionBO();
-
+        ActionBO actionBo = new ActionBO();      
+        
         switch (_action) 
         {
             case "add":
 
-                forward = ADD;
+                if (_permissions.check(_user.getProfile(), MODULE, _action)) {
 
+                    forward = ADD;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + _action + "] no modulo [" + MODULE + "].");
+                }                 
+                
                 break;
 
             case "edit":
 
-                Action action = actionBo.getAction(Integer.parseInt(id));
+                if (_permissions.check(_user.getProfile(), MODULE, _action)) {
 
-                request.setAttribute("action", action);
+                    Action action = actionBo.getAction(Integer.parseInt(id));
 
-                forward = EDIT;
+                    request.setAttribute("action", action);
 
-                break;
+                    forward = EDIT;
 
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + _action + "] no modulo [" + MODULE + "].");
+                }   
+                
+                break;             
+                
             case "list":
 
-                request.setAttribute("actions", actionBo.getAllActions());
+                if (_permissions.check(_user.getProfile(), MODULE, _action)) {
 
+                    request.setAttribute("actions", actionBo.getAllActions());
+                    forward = LIST;
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + _action + "] no modulo [" + MODULE + "].");
+                }                
+                
                 break;
 
             case "delete":
 
-                actionBo.deleteAction(Integer.parseInt(id));
-                
-                message.addMessage("Ação apagada com sucesso!");
-                
-                request.setAttribute("actions", actionBo.getAllActions());
+                if (_permissions.check(_user.getProfile(), MODULE, _action)) {
 
+                    actionBo.deleteAction(Integer.parseInt(id));
+
+                    message.addMessage("Ação apagada com sucesso!");
+
+                    request.setAttribute("actions", actionBo.getAllActions());
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + _action + "] no modulo [" + MODULE + "].");
+                }                 
+                
                 break;
 
-            default:
-
-                forward = ADD;
         }
 
         request.setAttribute("message", message);
         
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }
@@ -142,7 +180,7 @@ public class ActionController extends HttpServlet {
 
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }

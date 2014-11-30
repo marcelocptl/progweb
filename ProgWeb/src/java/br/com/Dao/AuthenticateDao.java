@@ -39,7 +39,7 @@ public class AuthenticateDao
                 user.setName(rs.getString("name"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("active"));
-                user.setId(rs.getLong("id"));
+                user.setId(rs.getInt("id"));
                 user.setProfile(rs.getInt("profile"));
            
                 return user;        

@@ -22,7 +22,7 @@ public class ProfileDao implements GenericDao<Profile>
         this.connection = connection;
     }
 
-    public void save(Profile profile) {
+    public int save(Profile profile) {
 
         try
         {
@@ -37,6 +37,8 @@ public class ProfileDao implements GenericDao<Profile>
         {
            e.printStackTrace();
         } 
+        
+        return -1;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class ProfileDao implements GenericDao<Profile>
 
         try
         {
-           String sql = "SELECT * FROM profile";
+           String sql = "SELECT * FROM profile ORDER BY id";
            
           Statement stmt = this.connection.createStatement();
            
@@ -141,5 +143,10 @@ public class ProfileDao implements GenericDao<Profile>
     public void updatePass(User user) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    @Override
+    public User authenticate(String email){
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }     
 
 }

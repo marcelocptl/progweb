@@ -23,7 +23,7 @@ public class ModuleDao implements GenericDao<Module>
         this.connection = connection;
     }
 
-    public void save(Module module) {
+    public int save(Module module) {
         
         try
         {
@@ -51,7 +51,9 @@ public class ModuleDao implements GenericDao<Module>
         catch (SQLException e)
         {
            e.printStackTrace();
-        } 
+        }
+        
+        return -1;
     }
 
     @Override
@@ -59,7 +61,7 @@ public class ModuleDao implements GenericDao<Module>
 
         try
         {
-           String sql = "SELECT * FROM module";
+           String sql = "SELECT * FROM module ORDER BY id";
            
            Statement stmt = this.connection.createStatement();
            
@@ -209,5 +211,10 @@ public class ModuleDao implements GenericDao<Module>
     public void updatePass(User user) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
+    @Override
+    public User authenticate(String email){
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    } 
+    
 }

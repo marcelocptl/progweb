@@ -2,78 +2,137 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 
+<c:set var="USER_MODULE" scope="session" value="User"/>
+<c:set var="PROFILE_MODULE" scope="session" value="Profile"/>
+<c:set var="ACTION_MODULE" scope="session" value="Action"/>
+<c:set var="MODULE_MODULE" scope="session" value="Module"/>
+<c:set var="PERMISSION_MODULE" scope="session" value="Permission"/>
+<c:set var="LOG_MODULE" scope="session" value="Log"/>
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>ProgWeb - Design Patterns</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="bootstrap/css/main.css" rel="stylesheet">
-    <style type="text/css">
-      body {
-        padding-top: 40px;
-        padding-bottom: 40px;
-        background-color: #330033;
-      }
+    <head>
+        <meta charset="utf-8">
+        <title>WebFilms - Catalog</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Trabalho de ProgWeb 2 - UFMS/CPTL - Bacharelado em Sistemas de Informação">
+        <meta name="author" content="Brucce Neves, Marcelo Henrique Pereira Lima e Marcos Roberto Nesso">
+        <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+        <link href="bootstrap/css/main.css" rel="stylesheet">
 
-      .form-signin {
-        color: #fff;
-        max-width: 400px;
-        padding: 19px 29px 29px;
-        margin: 0 auto 20px;
-        background-color: #000000;
-        border: 1px solid #333333;
-        -webkit-border-radius: 5px;
-           -moz-border-radius: 5px;
-                border-radius: 5px;
-        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-                box-shadow: 0 1px 2px rgba(0,0,0,.05);
-      }
-      .form-signin .form-signin-heading,
-      .form-signin {
-        margin-bottom: 10px;
-      }
-      .form-signin input[type="text"],
-      .form-signin input[type="password"] {
-        font-size: 16px;
-        height: auto;
-      }
-    </style>
-  </head>
-  <body>
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/ProgWeb"><i class="glyphicon glyphicon-film"></i> WebFilms
+                    </a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav pull-right">
+                        <c:choose>
+                            <c:when test="${_user != NULL}">
 
-    <div class="container">
+                                <li>
+                                    <a ><span class="text-warning"><i class="glyphicon glyphicon-user"></i> <c:out value="${_user.getName()}"/></span></a> 
+                                </li>
 
-       <c:import url = "/view/helper/message.jsp"/>
-       
-        <form class="form-signin" method="post" action="AuthenticateController?action=logon">
-            <div class="center">
-                <h2 class="form-signin-heading">Logon</h2>
-                <div class="form-group">
-                  <input type="text" class="input-block-level form-control" placeholder="E-mail" name="email">
-                </div>                
-                <div class="form-group">
-                  <input type="password" class="input-block-level form-control" placeholder="Senha" name="password">
-                </div>    
-                <button class="btn btn-large btn-success" type="submit"><i class="glyphicon glyphicon-ok"></i> Entrar</button>
-            </div>
-        </form>
-        <div class="form-signin">
-            <div class="center">
-                <a href="AuthenticateController?action=logonFacebook" >
-                    <button class="btn btn-large btn-primary"><i class="glyphicon glyphicon-user"></i> Entrar com Facebook</button>
-                </a>
-                <a href="#">
-                    <button class="btn btn-large btn-warning"><i class="glyphicon glyphicon-plus-sign"></i> Cadastre-se</button>
-                </a>
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Usuários <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <c:if test="${_permissions.check(_user.getProfile(), USER_MODULE, 'add')}"> 
+                                            <li><a href="UserController?action=add">Novo Usuário</a></li>
+                                        </c:if>    
+                                        <c:if test="${_permissions.check(_user.getProfile(), USER_MODULE, 'list')}">
+                                            <li><a href="UserController?action=list">Listar Usuários</a></li>
+                                        </c:if>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Controle de Acesso <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <c:if test="${_permissions.check(_user.getProfile(), PROFILE_MODULE, 'add')}">
+                                            <li><a href="ProfileController?action=add">Novo Perfil</a></li>
+                                            </c:if>   
+                                            <c:if test="${_permissions.check(_user.getProfile(), PROFILE_MODULE, 'list')}">
+                                            <li><a href="ProfileController?action=list">Listar Perfils</a></li>
+                                            </c:if>   
+                                            <c:if test="${_permissions.check(_user.getProfile(), ACTION_MODULE, 'add')}">
+                                            <li><a href="ActionController?action=add">Nova Ação</a></li>
+                                            </c:if>   
+                                            <c:if test="${_permissions.check(_user.getProfile(), ACTION_MODULE, 'list')}">
+                                            <li><a href="ActionController?action=list">Listar Ações</a></li>
+                                            </c:if>  
+                                            <c:if test="${_permissions.check(_user.getProfile(), MODULE_MODULE, 'add')}">
+                                            <li><a href="ModuleController?action=add">Novo Módulo</a></li>
+                                            </c:if>  
+                                            <c:if test="${_permissions.check(_user.getProfile(), MODULE_MODULE, 'list')}">
+                                            <li><a href="ModuleController?action=list">Listar Módulos</a></li>
+                                            </c:if>  
+                                            <c:if test="${_permissions.check(_user.getProfile(), PERMISSION_MODULE, 'add')}">
+                                            <li><a href="PermissionController?action=permission">Permissões</a></li>
+                                            </c:if>
+                                    </ul>
+                                </li>
+                                
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-cog"></i> </a>
+                                    <ul class="dropdown-menu">
+                                        <c:if test="${_permissions.check(_user.getProfile(), LOG_MODULE, 'list')}">
+                                            <li><a href="LogController?action=list"><i class="glyphicon glyphicon-stats"></i> Log do Sistema</a></li>
+                                        </c:if>
+
+                                        <li><a href="AuthenticateController?action=logoff"><i class="glyphicon glyphicon-off"></i> Sair</a></li>
+                                    </ul>
+                                </li>                                
+
+                            </c:when>
+                            <c:otherwise>
+                                <li><a href="UserController?action=add"><i class="glyphicon glyphicon-fire"></i> Cadastre-se</a></li>
+                                <li><a href="AuthenticateController?action=logon"><i class="glyphicon glyphicon-log-in"></i> Entrar</a></li>
+                            </c:otherwise>
+                        </c:choose>
+                    </ul>
+
+                </div><!--/.navbar-collapse -->
             </div>
         </div>
-    </div> <!-- /container -->
 
-    <script src="bootstrap/js/jquery.js"></script>
-  </body>
+        <c:import url = "/view/helper/message.jsp"/>
+
+        <div class="container bodycolor" id="container">        
+            <c:choose>
+                <c:when test="${pageContent != NULL}">
+                    <c:import url = "${pageContent}"/>
+                </c:when>
+
+                <c:otherwise>
+
+                </c:otherwise>
+            </c:choose>
+
+        </div>
+
+        <footer>
+            <div class="navbar navbar-inverse navbar-fixed-bottom">
+                <ul class="nav navbar-nav">
+                    <li><a><span class="text-warning"> &COPY; 2014 </span></a> </li>
+                    <li><a href="#">Developer by Brucce | Marcelo | Marcos</a></li>     
+                </ul>
+                <ul class="nav navbar-nav pull-right">   
+                    <li><a href="FilmesController?action=recentes">Filmes Recentes</a></li>
+                    <li><a href="FilmesController?action=melhores">Melhores Filmes</a></li>
+                </ul>                    
+            </div>
+        </footer>
+
+        <script src="bootstrap/js/jquery.js"></script>
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+    </body>
 </html>

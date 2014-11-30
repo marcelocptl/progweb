@@ -6,6 +6,9 @@ package br.com.controller;
 
 import br.com.business.LogBO;
 import br.com.model.Log;
+import br.com.model.Permission;
+import br.com.model.PermissionCollection;
+import br.com.model.User;
 import br.com.util.Message;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -23,13 +26,26 @@ import javax.servlet.http.HttpServletResponse;
 public class LogController extends HttpServlet {
 
     private static String LIST = "/view/log/list.jsp";
+    
+        private static String MODULE = "Log";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         Message message = Message.singleton();
          
-        String forward = LIST;
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");         
+        
+        if ( _user == null ) {
+            message.addWarning("É necessário estar logado em um usuário.");
+            
+            response.sendRedirect("AuthenticateController?action=logon");
+            
+            return;
+        }          
+        
+        String forward = null;
 
         String action = request.getParameter("action");
 
@@ -39,19 +55,24 @@ public class LogController extends HttpServlet {
         {
             case "list":
 
-                request.setAttribute("logs", logBo.getAllLogs());
+                if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                break;            
-            default:
+                    request.setAttribute("logs", logBo.getAllLogs());
+                    forward = LIST;
 
-                forward = LIST;
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                }                
+                
+                break;   
+
         }
 
         request.setAttribute("message", message);
         
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }
@@ -84,7 +105,7 @@ public class LogController extends HttpServlet {
 
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }

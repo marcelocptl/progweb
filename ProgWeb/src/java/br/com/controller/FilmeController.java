@@ -2,6 +2,8 @@ package br.com.controller;
 
 import br.com.business.ProfileBO;
 import br.com.business.UserBO;
+import br.com.model.Permission;
+import br.com.model.PermissionCollection;
 import br.com.model.User;
 import br.com.model.UserFilm;
 import br.com.util.LogRegister;
@@ -24,12 +26,25 @@ import javax.servlet.http.HttpSession;
 public class FilmeController extends HttpServlet {
 
     private static final String LIST = "/view/user/list.jsp";
+    
+        private static String MODULE = "Filme";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         Message message = Message.singleton();
 
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");         
+        
+        if ( _user == null ) {
+            message.addWarning("É necessário estar logado em um usuário.");
+            
+            response.sendRedirect("AuthenticateController?action=logon");
+            
+            return;
+        }         
+        
         String forward = LIST;
 
         String action = request.getParameter("action");
@@ -65,7 +80,7 @@ public class FilmeController extends HttpServlet {
         request.setAttribute("filmes", list);
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }
@@ -119,7 +134,7 @@ public class FilmeController extends HttpServlet {
                     } 
                     else 
                     {
-                        user.setId(Long.parseLong(id));
+                        user.setId(Integer.parseInt(id));
 
                         userBo.updateUser(user);
                         
@@ -144,7 +159,7 @@ public class FilmeController extends HttpServlet {
         
         request.setAttribute("pageContent", forward);
 
-        RequestDispatcher view = request.getRequestDispatcher("/view/index/index.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
 
         view.forward(request, response);
     }

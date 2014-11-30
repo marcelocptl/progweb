@@ -13,12 +13,12 @@ import java.util.ArrayList;
  */
 public class UserBO {
 
-    public void insertUser(User user) {
+    public int insertUser(User user) {
         GenericDao<User> userDao = DaoFactory.getDaoFactory().getUserDao();
 
         if (user.getPassword() != null) user.setPassword(Md5.encrypt(user.getPassword()));
 
-        userDao.save(user);
+        return userDao.save(user);
     }
 
     public ArrayList<User> getAllUsers() {
@@ -59,4 +59,12 @@ public class UserBO {
         
         userDao.updatePass(user);
     }
+    
+    public User authenticate(String email) 
+    {
+        GenericDao<User> userDao = DaoFactory.getDaoFactory().getUserDao();
+        
+        
+        return userDao.authenticate(email);
+    }    
 }

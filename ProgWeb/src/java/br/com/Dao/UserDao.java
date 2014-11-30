@@ -21,7 +21,9 @@ public class UserDao implements GenericDao<User> {
     }
 
     @Override
-    public void save(User user) {
+    public int save(User user) {
+        
+        int id = -1;
         
         try {
 
@@ -31,14 +33,20 @@ public class UserDao implements GenericDao<User> {
 
             String sql = "INSERT INTO userdb (name,email,active,password,profile) VALUES ('" + user.getName() + "','" + user.getEmail() + "','" + user.getActive() + "', " + user.getPassword() + " ,'" + user.getProfile() + "')";
 
-            PreparedStatement stmt = this.connection.prepareStatement(sql);
+            PreparedStatement stmt = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             stmt.executeUpdate();
+            
+            ResultSet rsID = stmt.getGeneratedKeys();  
+
+            if(rsID.next())  
+                id = rsID.getInt("id");            
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
+        return id;
     }
 
     @Override
@@ -87,7 +95,7 @@ public class UserDao implements GenericDao<User> {
                 user.setName(rs.getString("name"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("active"));
-                user.setId(rs.getLong("id"));
+                user.setId(rs.getInt("id"));
                 user.setProfile(rs.getInt("profile"));
 
                 return user;
@@ -99,27 +107,18 @@ public class UserDao implements GenericDao<User> {
 
     }
 
-    public User authenticate(String email, String password) {
+    @Override
+    public User authenticate(String email) {
         try {
 
-            if (password != null) password = "= '"+ password +"'";
-            else password = "is null";
-
-            String sql = "SELECT * FROM userdb WHERE email = '" + email + "' AND password " + password;
+            String sql = "SELECT * FROM userdb WHERE email = '" + email + "'";
 
             Statement stmt = this.connection.createStatement();
 
             ResultSet rs = stmt.executeQuery(sql);
 
             if (rs.next()) {
-                User user = new User();
-                user.setName(rs.getString("name"));
-                user.setEmail(rs.getString("email"));
-                user.setActive(rs.getBoolean("active"));
-                user.setId(rs.getLong("id"));
-                user.setProfile(rs.getInt("profile"));
-
-                return user;
+                return new User();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -131,7 +130,7 @@ public class UserDao implements GenericDao<User> {
     public ArrayList<User> list() {
 
         try {
-            String sql = "SELECT * FROM userdb";
+            String sql = "SELECT * FROM userdb ORDER BY name ASC";
 
             Statement stmt = this.connection.createStatement();
 
@@ -144,7 +143,7 @@ public class UserDao implements GenericDao<User> {
                 user.setName(rs.getString("name"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("active"));
-                user.setId(rs.getLong("id"));
+                user.setId(rs.getInt("id"));
                 user.setProfile(rs.getInt("profile"));
 
                 users.add(user);
