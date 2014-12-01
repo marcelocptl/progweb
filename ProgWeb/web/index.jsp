@@ -142,7 +142,7 @@
                 </ul>
                 <ul class="nav navbar-nav pull-right">   
                     <li><a href="FilmeController?action=recentes">Filmes Recentes</a></li>
-                    <li><a href="FilmeController?action=melhores">Melhores Filmes</a></li>
+                    <!--<li><a href="FilmeController?action=melhores">Melhores Filmes</a></li>-->
                 </ul>                    
             </div>
         </footer>
