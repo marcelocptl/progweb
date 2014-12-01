@@ -3,6 +3,7 @@ package br.com.jdbc.factory;
 
 import br.com.Dao.ActionDao;
 import br.com.Dao.AuthenticateDao;
+import br.com.Dao.CommentDao;
 import br.com.Dao.DaoFactory;
 import br.com.Dao.UserDao;
 import br.com.Dao.GenericDao;
@@ -72,5 +73,10 @@ public class JDBCDaoFactory extends DaoFactory{
     public LogDao getLogDao() {
         return new LogDao(this.connection);
     }
+    
+    @Override
+    public CommentDao getCommentDao() {
+        return new CommentDao(this.connection);
+    }    
     
 }

@@ -34,6 +34,15 @@
                     </a>
                 </div>
                 <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        
+                        <li><a href="FilmeController?action=list"><i class="glyphicon glyphicon-globe"></i> Catálogo de Filmes</a></li>
+                        <c:if test="${_user != null}"> 
+                            <li><a href="#"><i class="glyphicon glyphicon-list"></i> Meus Filmes</a></li>
+                        </c:if>  
+                            
+                    </ul>
+                    
                     <ul class="nav navbar-nav pull-right">
                         <c:choose>
                             <c:when test="${_user != NULL}">
@@ -110,7 +119,7 @@
                 </c:when>
 
                 <c:otherwise>
-
+                    <c:import url = "/view/home/home.jsp"/>
                 </c:otherwise>
             </c:choose>
 

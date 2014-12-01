@@ -7,6 +7,7 @@ import br.com.model.User;
 import br.com.util.LogRegister;
 import br.com.util.LoginFacebook;
 import br.com.util.Message;
+import br.com.util.WebService;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -122,7 +123,7 @@ public class AuthenticateController extends HttpServlet {
                 session.setAttribute("_user", user);
 
                 session.setAttribute("_permissions", permissionBo.getProfilePermissions(user.getProfile()));
-
+                
                 message.addMessage("Facebook autenticado com sucesso!");
             
             } catch (Exception e) {

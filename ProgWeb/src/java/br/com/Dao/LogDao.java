@@ -4,10 +4,10 @@
  */
 package br.com.Dao;
 
+import br.com.business.UserBO;
 import br.com.model.Log;
 import br.com.model.User;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,8 +26,12 @@ public class LogDao {
     }
 
     public ArrayList<Log> list() {
+        
         try {
-            String sql = "SELECT * FROM log INNER JOIN userdb ON userdb.id = log.userdb";
+            
+            UserBO userBo = new UserBO();
+            
+            String sql = "SELECT * FROM log";
 
             Statement stmt = this.connection.createStatement();
 
@@ -38,9 +42,8 @@ public class LogDao {
             while (rs.next()) {
                 
                 Log log = new Log();
-                User user = new User();
+                User user = userBo.getUser(rs.getInt("userdb"));
                 
-                user.setName(rs.getString("name"));
                 log.setId(rs.getInt("id"));
                 log.setModule(rs.getString("module"));
                 log.setAction(rs.getString("action"));

@@ -1,16 +1,27 @@
-.center {margin-left: auto; margin-right: auto; width: 95%; text-align: center;}
-
 body {
     color: #bababa;
     padding-top: 50px;
     background-color: #330033;
 }
 
+.center {
+    margin-left: auto !important; 
+    margin-right: auto !important; 
+    width: 95%; 
+    text-align: center;
+}
+
+a img:hover {
+    opacity: 0.8;
+}
+
+p {
+    text-align: justify;
+}
+
 section {
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-bottom: 30px;
-    margin-bottom: 50px;
+    padding: 30px;
+    margin-bottom: 30px;
 }
 
 .form-signin, section {
@@ -37,6 +48,17 @@ section {
 .form-signin input[type="password"] {
     font-size: 16px;
     height: auto;
+}
+
+.film-search {
+    padding-right: 0;
+    padding-top: 0 !important;
+}
+
+.film-search-input {
+    background-color: #494949;
+    border: 1px solid #575757;
+    color: #cccccc;
 }
 
 @media (max-width: 800px) {

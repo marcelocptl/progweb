@@ -1,13 +1,16 @@
 package br.com.controller;
 
-import br.com.business.ProfileBO;
+import br.com.business.CommentBO;
 import br.com.business.UserBO;
+import br.com.model.Comment;
+import br.com.model.Filme;
 import br.com.model.Permission;
 import br.com.model.PermissionCollection;
 import br.com.model.User;
 import br.com.model.UserFilm;
 import br.com.util.LogRegister;
 import br.com.util.Message;
+import br.com.util.WebService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -17,7 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -25,34 +27,34 @@ import javax.servlet.http.HttpSession;
  */
 public class FilmeController extends HttpServlet {
 
-    private static final String LIST = "/view/user/list.jsp";
-    
-        private static String MODULE = "Filme";
+    private static final String LIST = "/view/film/list.jsp";
+
+    private static final String SEARCH = "/view/film/search.jsp";
+
+    private static final String VIEW = "/view/film/view.jsp";
+
+    private static final String MODULE = "Filme";
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Message message = Message.singleton();
 
         PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
-        User _user = (User) request.getSession(true).getAttribute("_user");         
-        
-        if ( _user == null ) {
-            message.addWarning("É necessário estar logado em um usuário.");
-            
-            response.sendRedirect("AuthenticateController?action=logon");
-            
-            return;
-        }         
-        
-        String forward = LIST;
+        User _user = (User) request.getSession(true).getAttribute("_user");
 
+        String forward = null;
+
+        CommentBO commentBO = new CommentBO();
+        
         String action = request.getParameter("action");
 
+        String title = request.getParameter("search");
+
         String id = request.getParameter("id");
+
         ArrayList<UserFilm> list = null;
-        switch (action) 
-        {
+
+        switch (action) {
             case "recentes":
 
                 break;
@@ -63,6 +65,52 @@ public class FilmeController extends HttpServlet {
 
             case "list":
 
+                forward = LIST;
+
+                request.setAttribute("filmes", WebService.allFilms());
+
+                break;
+
+            case "search":
+
+                forward = SEARCH;
+
+                request.setAttribute("filmes", WebService.searchFilms(title));
+
+                break;
+
+            case "delete":
+
+                 if (_permissions.check(_user.getProfile(), MODULE, action)) {
+
+                        id = request.getParameter("id");
+                        
+                        String userId = request.getParameter("user");
+                     
+                        String date = request.getParameter("date");
+                        
+                        String time = request.getParameter("time");
+
+                        commentBO.delete(id, userId, date, time);
+
+                        User user = new UserBO().getUser(Integer.parseInt(userId));
+                        
+                        Filme filme = WebService.getFilm(id);
+                        
+                        LogRegister.singleton().toLog(MODULE, action, "Comentário de ["+user.getName()+"] em [" + filme.getNome() + "] deletado.", _user.getId());
+
+                 } else {
+                     message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
+                 }                 
+                
+            case "view":
+                
+                forward = VIEW;
+
+                request.setAttribute("comments", commentBO.list(id));
+
+                request.setAttribute("filme", WebService.getFilm(id));
+                
                 break;
 
             case "favoritos":
@@ -73,11 +121,12 @@ public class FilmeController extends HttpServlet {
                 break;
             case "assistidos":
 
-                break;
+                break;                               
+                
         }
 
         request.setAttribute("message", message);
-        request.setAttribute("filmes", list);
+
         request.setAttribute("pageContent", forward);
 
         RequestDispatcher view = request.getRequestDispatcher("/index.jsp");
@@ -86,77 +135,73 @@ public class FilmeController extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Message message = Message.singleton();
-        
+
+        PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
+        User _user = (User) request.getSession(true).getAttribute("_user");
+
+        if (_user == null) {
+            message.addWarning("É necessário estar logado em um usuário.");
+
+            response.sendRedirect("AuthenticateController?action=logon");
+
+            return;
+        }
+
         User user;
 
-        String forward = "";
+        String forward = null;
 
         String action = request.getParameter("action");
 
-        String id = request.getParameter("id");
-
         UserBO userBo = new UserBO();
 
-        String password = request.getParameter("password");
-                    
-        HttpSession session = request.getSession(true);
-        
-        User _user = (User) session.getAttribute("_user");
-        
-        try 
-        {
-            switch (action) 
-            {
-                case "add":
+        try {
+            switch (action) {
+                
+                case "comment":
 
-                case "edit":
+                    if (_permissions.check(_user.getProfile(), MODULE, action)) {
 
-                    String name = request.getParameter("name");
+                        String id = request.getParameter("id");
 
-                    String email = request.getParameter("email");
+                        String comment = request.getParameter("comment");
 
-                    boolean active = request.getParameter("active") != null ? true : false;
+                        if (comment == null || comment.isEmpty()) {
 
-                    int profileId = Integer.parseInt(request.getParameter("profile"));
-                    
-                    user = new User(name, email, active, password, profileId);
+                            message.addWarning("Nenhum comentário informado!");
 
-                    if (id == null || id.isEmpty()) 
-                    {
-                        userBo.insertUser(user);
+                        } else {
+
+                            CommentBO commentBO = new CommentBO();
+
+                            commentBO.save(new Comment(id, _user, comment));
                         
-                        LogRegister.singleton().toLog("User", action, "Usuário ["+ user.getName()+"] inserido.", _user.getId());
-                        
-                        message.addMessage("Usuário adicionado com sucesso!");
-                    } 
-                    else 
-                    {
-                        user.setId(Integer.parseInt(id));
+                            Filme filme = WebService.getFilm(id);                            
+                            
+                            LogRegister.singleton().toLog(MODULE, action, "Usuário comentou [" + filme.getNome() + "].", _user.getId());
 
-                        userBo.updateUser(user);
-                        
-                        LogRegister.singleton().toLog("User", action, "Usuário ["+ user.getName()+"] atualizado.", _user.getId());
-                        
-                        message.addMessage("Usuário atualizado com sucesso!");
+                            forward = VIEW;
+
+                            request.setAttribute("comments", commentBO.list(id));
+                            
+                            request.setAttribute("filme", WebService.getFilm(id));
+
+                        }
+
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
                     }
-
-                    request.setAttribute("users", userBo.getAllUsers());
-
-                    forward = LIST;
 
                     break;
             }
-        } 
-        catch (Exception ex) 
-        {
+        } catch (Exception ex) {
             Logger.getLogger(FilmeController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         request.setAttribute("message", message);
-        
+
         request.setAttribute("pageContent", forward);
 
         RequestDispatcher view = request.getRequestDispatcher("/index.jsp");

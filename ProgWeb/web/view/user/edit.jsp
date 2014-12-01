@@ -6,7 +6,7 @@
     <div class="page-header">
         <h1>Editar Usuário</h1>
     </div>
-    <form class="form-horizontal allform" action="UserController?action=edit&id=<c:out value="${user.getId()}"/>" method="post">
+    <form class="form-horizontal" action="UserController?action=edit&id=<c:out value="${user.getId()}"/>" method="post">
 
         <div class="form-group">
             <label for="name" class="col-lg-2 control-label">Nome</label>

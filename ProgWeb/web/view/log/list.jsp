@@ -24,7 +24,7 @@
                     <td><c:out value="${log.getDate()}" /></td>
                     <td><c:out value="${log.getModule()}" /></td>
                     <td><c:out value="${log.getAction()}" /></td>
-                    <td><c:out value="${log.getUser().getName()}" /></td>                
+                    <td><c:out value="${log.getUser()}" /></td>                
                     <td><c:out value="${log.getMessage()}" /></td> 
                 </tr>
             </c:forEach>

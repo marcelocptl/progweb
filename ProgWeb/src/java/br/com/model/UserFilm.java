@@ -12,7 +12,7 @@ package br.com.model;
 public class UserFilm {
     
     private int user_id;
-    private String imde_id;
+    private String imdb_id;
     private boolean favorito;
     private boolean pretende_ver;
     private boolean assistiu;
@@ -27,11 +27,11 @@ public class UserFilm {
     }
 
     public String getImde_id() {
-        return imde_id;
+        return imdb_id;
     }
 
-    public void setImde_id(String imde_id) {
-        this.imde_id = imde_id;
+    public void setImde_id(String imdb_id) {
+        this.imdb_id = imdb_id;
     }
 
     public boolean isFavorito() {

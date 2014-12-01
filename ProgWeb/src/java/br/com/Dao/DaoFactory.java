@@ -31,4 +31,6 @@ public abstract class DaoFactory {
     public abstract PermissionDao getPermissionDao();
     
     public abstract LogDao getLogDao();
+    
+    public abstract CommentDao getCommentDao();
 }

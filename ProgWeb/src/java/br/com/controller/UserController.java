@@ -41,7 +41,7 @@ public class UserController extends HttpServlet {
         PermissionCollection<Permission> _permissions = (PermissionCollection<Permission>) request.getSession(true).getAttribute("_permissions");
         User _user = (User) request.getSession(true).getAttribute("_user");
 
-        if (_user == null && !action.equals("add")) {
+        if ( action == null || (_user == null && !action.equals("add")) ) {
             message.addWarning("É necessário estar logado em um usuário.");
 
             response.sendRedirect("AuthenticateController?action=logon");

@@ -5,6 +5,7 @@
 package br.com.model;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -43,16 +44,23 @@ public class Log {
         this.action = action;
     }
 
-    public User getUser() {
-        return user;
+    public String getUser() {
+        
+        if (user == null) return "[Deletado]";
+        
+        return user.getName();
     }
 
     public void setUser(User user) {
         this.user = user;
     }
 
-    public Date getDate() {
-        return date;
+    public String getDate() {
+        
+        String dataz = "dd/MM/yyyy - h:mm";
+        SimpleDateFormat formatas = new SimpleDateFormat(dataz );
+        return formatas.format(date);
+
     }
 
     public void setDate(Date date) {
