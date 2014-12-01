@@ -141,8 +141,8 @@
                     <li><a href="#">Developer by Brucce | Marcelo | Marcos</a></li>     
                 </ul>
                 <ul class="nav navbar-nav pull-right">   
-                    <li><a href="FilmesController?action=recentes">Filmes Recentes</a></li>
-                    <li><a href="FilmesController?action=melhores">Melhores Filmes</a></li>
+                    <li><a href="FilmeController?action=recentes">Filmes Recentes</a></li>
+                    <li><a href="FilmeController?action=melhores">Melhores Filmes</a></li>
                 </ul>                    
             </div>
         </footer>

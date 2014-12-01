@@ -7,7 +7,6 @@ import br.com.model.User;
 import br.com.util.LogRegister;
 import br.com.util.LoginFacebook;
 import br.com.util.Message;
-import br.com.util.WebService;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,7 +79,9 @@ public class AuthenticateController extends HttpServlet {
 
                     session.invalidate();
 
-                    break;
+                    response.sendRedirect("IndexController");
+                        
+                    return;
 
                 default:
 
@@ -124,7 +125,9 @@ public class AuthenticateController extends HttpServlet {
 
                 session.setAttribute("_permissions", permissionBo.getProfilePermissions(user.getProfile()));
                 
-                message.addMessage("Facebook autenticado com sucesso!");
+                response.sendRedirect("IndexController");
+                        
+                return;
             
             } catch (Exception e) {
                 message.addWarning("Não foi possível conectar com o facebook!");
@@ -166,17 +169,19 @@ public class AuthenticateController extends HttpServlet {
                         request.setAttribute("pageContent", "/login.jsp");
                         
                     } else {
+                        
                         HttpSession session = request.getSession(true);
 
                         session.setAttribute("_user", user);
 
                         session.setAttribute("_permissions", permissionBo.getProfilePermissions(user.getProfile()));
-
-                        message.addMessage("Usuário autenticado com sucesso!");
+                        
+                        response.sendRedirect("IndexController");
+                        
+                        return;
 
                     }
                     break;
-
             }
         } catch (Exception ex) {
             Logger.getLogger(AuthenticateController.class.getName()).log(Level.SEVERE, null, ex);

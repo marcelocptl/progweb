@@ -20,6 +20,10 @@
         <servlet-name>FilmeController</servlet-name>
         <servlet-class>br.com.controller.FilmeController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>IndexController</servlet-name>
+        <servlet-class>br.com.controller.IndexController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserController</servlet-name>
         <url-pattern>/UserController</url-pattern>
@@ -68,6 +72,15 @@
         <servlet-name>FilmeController</servlet-name>
         <url-pattern>/FilmeController</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>IndexController</servlet-name>
+        <url-pattern>/IndexController</url-pattern>
+    </servlet-mapping>
+    
+    <welcome-file-list>
+        <welcome-file>IndexController</welcome-file>
+    </welcome-file-list>
+    
     <session-config>
         <session-timeout>
             30

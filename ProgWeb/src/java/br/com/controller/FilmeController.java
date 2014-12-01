@@ -55,8 +55,13 @@ public class FilmeController extends HttpServlet {
         ArrayList<UserFilm> list = null;
 
         switch (action) {
+            
             case "recentes":
 
+                forward = SEARCH;
+                
+                request.setAttribute("filmes", WebService.recents());
+                
                 break;
 
             case "melhores":
