@@ -36,7 +36,7 @@ public class CommentDao {
     public Boolean delete(String imdb, String user, String date, String time) {
         try
         {
-           String sql = "DELETE FROM comentarios WHERE imdb_id = '" + imdb + "' AND userdb_id = '"+ user +"' AND _create = '"+ date +"' AND time ='"+ time +"'";
+           String sql = "DELETE FROM comentarios WHERE imdb_id = '" + imdb + "' AND userdb_id = '"+ user +"' AND _create = '"+ date +"' AND time >='"+ time +".0' AND time <='"+ time +".999999'";
            
             PreparedStatement stmt = this.connection.prepareStatement(sql);
 
