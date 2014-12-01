@@ -50,43 +50,52 @@
                                 <li>
                                     <a ><span class="text-warning"><i class="glyphicon glyphicon-user"></i> <c:out value="${_user.getName()}"/></span></a> 
                                 </li>
-
+                                <c:set var="add_user" value="${_permissions.check(_user.getProfile(), USER_MODULE, 'add')}"/>
+                                <c:set var="list_user" value="${_permissions.check(_user.getProfile(), USER_MODULE, 'list')}"/>
+                                <c:if test="${add_user || list_user}"> 
                                 <li class="dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Usuários <b class="caret"></b></a>
                                     <ul class="dropdown-menu">
-                                        <c:if test="${_permissions.check(_user.getProfile(), USER_MODULE, 'add')}"> 
+                                        <c:if test="${add_user}"> 
                                             <li><a href="UserController?action=add">Novo Usuário</a></li>
                                         </c:if>    
-                                        <c:if test="${_permissions.check(_user.getProfile(), USER_MODULE, 'list')}">
+                                        <c:if test="${list_user}"> 
                                             <li><a href="UserController?action=list">Listar Usuários</a></li>
                                         </c:if>
                                     </ul>
                                 </li>
-
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Controle de Acesso <b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                        <c:if test="${_permissions.check(_user.getProfile(), PROFILE_MODULE, 'add')}">
+                                </c:if>
+                                <c:set var="add_profile" value="${_permissions.check(_user.getProfile(), PROFILE_MODULE, 'add')}"/>
+                                <c:set var="list_profile" value="${_permissions.check(_user.getProfile(), PROFILE_MODULE, 'list')}"/>
+                                <c:set var="add_action" value="${_permissions.check(_user.getProfile(), ACTION_MODULE, 'add')}"/>
+                                <c:set var="list_action" value="${_permissions.check(_user.getProfile(), ACTION_MODULE, 'list')}"/>
+                                <c:set var="add_module" value="${_permissions.check(_user.getProfile(), MODULE_MODULE, 'add')}"/>
+                                <c:set var="list_module" value="${_permissions.check(_user.getProfile(), MODULE_MODULE, 'list')}"/>
+                                <c:if test="${add_profile || list_profile || add_action || list_action || add_module || list_module}">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Controle de Acesso <b class="caret"></b></a>
+                                        <ul class="dropdown-menu">
+                                            <c:if test="${add_profile}">
                                             <li><a href="ProfileController?action=add">Novo Perfil</a></li>
                                             </c:if>   
-                                            <c:if test="${_permissions.check(_user.getProfile(), PROFILE_MODULE, 'list')}">
+                                            <c:if test="${list_profile}">
                                             <li><a href="ProfileController?action=list">Listar Perfils</a></li>
                                             </c:if>   
-                                            <c:if test="${_permissions.check(_user.getProfile(), ACTION_MODULE, 'add')}">
+                                            <c:if test="${add_action}">
                                             <li><a href="ActionController?action=add">Nova Ação</a></li>
                                             </c:if>   
-                                            <c:if test="${_permissions.check(_user.getProfile(), ACTION_MODULE, 'list')}">
+                                            <c:if test="${list_action}">
                                             <li><a href="ActionController?action=list">Listar Ações</a></li>
                                             </c:if>  
-                                            <c:if test="${_permissions.check(_user.getProfile(), MODULE_MODULE, 'add')}">
+                                            <c:if test="${add_module}">
                                             <li><a href="ModuleController?action=add">Novo Módulo</a></li>
                                             </c:if>  
-                                            <c:if test="${_permissions.check(_user.getProfile(), MODULE_MODULE, 'list')}">
+                                            <c:if test="${list_module}">
                                             <li><a href="ModuleController?action=list">Listar Módulos</a></li>
                                             </c:if>
-                                    </ul>
-                                </li>
-                                
+                                        </ul>
+                                    </li>
+                                </c:if>
                                 <li class="dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-cog"></i> </a>
                                     <ul class="dropdown-menu">
