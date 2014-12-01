@@ -20,21 +20,23 @@ public class WebService {
     private static String openURL(String url) throws IOException {      
         
         URL end = new URL(url);
+        
         URLConnection conn = end.openConnection();
+        
         BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        
         String content = br.readLine();
-        //while ((inputLine = br.readLine()) != null) {
-        //    content += inputLine + "\n";
-        //}
+
         br.close();
+        
         return content;
     }
 
     public static ArrayList<Filme> allFilms(){
-        String url = "http://filmssensors.esy.es/";
+        String url = "http://filmssensors.esy.es/webservice/filmes.php?title=%";
         
         try {
-            return allFilms(new JSONArray(openURL(url)));
+            return gerarLista(new JSONObject(openURL(url)));
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
@@ -43,10 +45,10 @@ public class WebService {
     }    
     
     public static Filme getFilm(String imdb){
-        String url = "http://filmssensors.esy.es/filmes.php?id="+imdb;
+        String url = "http://filmssensors.esy.es/webservice/filmes.php?id="+imdb;
         
         try {
-            ArrayList<Filme> list = searchFilms(new JSONObject(openURL(url)));
+            ArrayList<Filme> list = gerarLista(new JSONObject(openURL(url)));
             
             return list.get(0);
         } catch (IOException ex) {
@@ -57,22 +59,28 @@ public class WebService {
     }    
     
     public static ArrayList<Filme> searchFilms(String title){
-        String url = "http://filmssensors.esy.es/filmes.php?title="+title;
+        
+        String url = "http://filmssensors.esy.es/webservice/filmes.php?title="+title;
         
         try {
-            return searchFilms(new JSONObject(openURL(url)));
+            
+            return gerarLista(new JSONObject(openURL(url)));
+            
         } catch (IOException ex) {
+            
             System.err.println(ex.getMessage());
+            
         }
         
         return null;
     }
     
     public static ArrayList<Filme> recents(){
-        String url = "http://filmssensors.esy.es/filmes.php?lancamento=2014";
+        
+        String url = "http://filmssensors.esy.es/webservice/filmes.php?lancamento=2014";
         
         try {
-            return searchFilms(new JSONObject(openURL(url)));
+            return gerarLista(new JSONObject(openURL(url)));
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
@@ -80,7 +88,7 @@ public class WebService {
         return null;
     }    
     
-    private static ArrayList<Filme> searchFilms(JSONObject json){
+    private static ArrayList<Filme> gerarLista(JSONObject json){
 
         ArrayList<Filme> filmes = new ArrayList();
                 
@@ -98,35 +106,33 @@ public class WebService {
             } catch (JSONException e) {}
             
             try {
-                filme.setNome(filmesJSON.getString("nome"));
+                filme.setNome(filmesJSON.getString("Nome"));
             } catch (JSONException e) {}
             
             try {
-                filme.setSinopse(filmesJSON.getString("sinopse"));
+                filme.setSinopse(filmesJSON.getString("Sinopse"));
             } catch (JSONException e) {}
             
             try {
-                filme.setLancamento(filmesJSON.getString("lancamento"));
+                filme.setLancamento(filmesJSON.getString("Lancamento"));
             } catch (JSONException e) {}
             
             try {
-                filme.setImagem(filmesJSON.getString("imagem"));
+                filme.setImagem(filmesJSON.getString("Imagem"));
             } catch (JSONException e) {}
                 
             try {
                 
-                JSONObject jsonObject = filmesJSON.getJSONObject("atores");
+                JSONArray jsonArray = filmesJSON.getJSONArray("Atores");
                 
                 ArrayList<String> stringList = new ArrayList();
-                
-                Iterator<String> itr2 = jsonObject.keys();
 
-                while(itr.hasNext()) {
+                for (int j=0; j < jsonArray.length(); j++) {
                     
-                    JSONObject jsonObject2 = jsonObject.getJSONObject(itr2.next());
+                    JSONObject jsonObject2 = jsonArray.getJSONObject(j);
                     
-                    String nome = jsonObject2.getString("nome");
-                    String personagem = jsonObject2.getString("personagem");
+                    String nome = jsonObject2.getString("Nome");
+                    String personagem = jsonObject2.getString("Personagem");
                     
                     if (nome == null && personagem != null) nome = personagem;
                     else
@@ -141,23 +147,39 @@ public class WebService {
             
             try {
                 
-                JSONObject jsonObject = filmesJSON.getJSONObject("diretores");
+                JSONObject jsonObject = filmesJSON.getJSONObject("Diretores");
                 
                 ArrayList<String> stringList = new ArrayList();
                 
                 Iterator<String> itr2 = jsonObject.keys();
                 
-                while(itr.hasNext()) {
-                    
-                    JSONObject jsonObject2 = jsonObject.getJSONObject(itr2.next());    
-                    
-                    stringList.add( jsonObject2.getString("nome") );
+                while(itr2.hasNext()) {
+
+                    stringList.add( jsonObject.getString(itr2.next()) );
                     
                 }                
                 
                 filme.setDiretores(stringList);
                 
             } catch (JSONException e) {}                     
+            
+            try {
+                
+                JSONObject jsonObject = filmesJSON.getJSONObject("Generos");
+                
+                ArrayList<String> stringList = new ArrayList();
+                
+                Iterator<String> itr2 = jsonObject.keys();
+                
+                while(itr2.hasNext()) {
+
+                    stringList.add( jsonObject.getString(itr2.next()) );
+                    
+                }                              
+                
+                filme.setGeneros(stringList);
+                
+            } catch (JSONException e) {}            
             
             filmes.add(filme);         
             
@@ -166,7 +188,7 @@ public class WebService {
         return filmes;
 
     }    
-    
+    /*
     private static ArrayList<Filme> allFilms(JSONArray json){
 
         ArrayList<Filme> filmes = new ArrayList();
@@ -255,4 +277,5 @@ public class WebService {
         return filmes;
 
     }    
+    */
 }
