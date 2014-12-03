@@ -37,8 +37,16 @@
                     <ul class="nav navbar-nav">
                         
                         <li><a href="FilmeController?action=list"><i class="glyphicon glyphicon-globe"></i> Catálogo de Filmes</a></li>
-                        <c:if test="${_user != null}"> 
-                            <li><a href="#"><i class="glyphicon glyphicon-list"></i> Meus Filmes</a></li>
+                        <c:if test="${_user != null}">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-list"></i> Meus Filmes<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="FilmeController?action=myfilmes">Todos</a></li>
+                                    <li><a href="FilmeController?action=myassistidos">Já Assisti</a></li>
+                                    <li><a href="FilmeController?action=mypretendidos">Pretendo Ver</a></li>
+                                    <li><a href="FilmeController?action=myfavoritos">Meus Favoritos</a></li>
+                                </ul>
+                            </li>
                         </c:if>  
                             
                     </ul>
@@ -52,7 +60,7 @@
                                 </li>
                                 <c:set var="add_user" value="${_permissions.check(_user.getProfile(), USER_MODULE, 'add')}"/>
                                 <c:set var="list_user" value="${_permissions.check(_user.getProfile(), USER_MODULE, 'list')}"/>
-                                <c:if test="${add_user || list_user}"> 
+                                <c:if test="${add_user || list_user}">
                                 <li class="dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Usuários <b class="caret"></b></a>
                                     <ul class="dropdown-menu">
@@ -142,7 +150,7 @@
                 </ul>
                 <ul class="nav navbar-nav pull-right">   
                     <li><a href="FilmeController?action=recentes">Filmes Recentes</a></li>
-                    <!--<li><a href="FilmeController?action=melhores">Melhores Filmes</a></li>-->
+                    <li><a href="FilmeController?action=melhores">Melhores Filmes</a></li>
                 </ul>                    
             </div>
         </footer>

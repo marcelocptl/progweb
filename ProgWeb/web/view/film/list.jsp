@@ -16,9 +16,10 @@
             <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
                 <li role="presentation"><a href="#">Lançamento</a></li>
                 <li role="presentation"><a href="#">Por Gênero</a></li>
-                <li role="presentation"><a href="#">Mais Assistidos</a></li>
-                <li role="presentation"><a href="#">Mais Pretendidos</a></li>
-                <li role="presentation"><a href="#">Mais Favoritados</a></li>
+                <li role="presentation"><a href="FilmeController?action=assistidos">Mais Assistidos</a></li>
+                <li role="presentation"><a href="FilmeController?action=pretendidos">Mais Pretendidos</a></li>
+                <li role="presentation"><a href="FilmeController?action=favoritos">Mais Favoritados</a></li>
+                <li role="presentation"><a href="FilmeController?action=melhores">Melhores Classificados</a></li>
             </ul>
             
         </div>

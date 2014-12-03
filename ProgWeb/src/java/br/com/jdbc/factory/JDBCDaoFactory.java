@@ -11,6 +11,7 @@ import br.com.Dao.LogDao;
 import br.com.Dao.ProfileDao;
 import br.com.Dao.ModuleDao;
 import br.com.Dao.PermissionDao;
+import br.com.Dao.UserFilmsDao;
 import br.com.model.Action;
 import br.com.model.Profile;
 import br.com.model.Module;
@@ -78,5 +79,9 @@ public class JDBCDaoFactory extends DaoFactory{
     public CommentDao getCommentDao() {
         return new CommentDao(this.connection);
     }    
-    
+
+    @Override
+    public UserFilmsDao getUserFilmsDao() {
+        return new UserFilmsDao(this.connection);
+    }
 }

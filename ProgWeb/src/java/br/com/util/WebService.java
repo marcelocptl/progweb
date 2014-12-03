@@ -1,6 +1,7 @@
 package br.com.util;
 
 import br.com.model.Filme;
+import br.com.model.UserFilm;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -87,6 +88,14 @@ public class WebService {
         
         return null;
     }    
+    
+    public static ArrayList<Filme> findFilms(ArrayList<UserFilm> list){
+        ArrayList<Filme> filmes = new ArrayList();
+        for(UserFilm uf : list){
+            filmes.add(getFilm(uf.getImde_id()));
+        }
+        return filmes;
+    }
     
     private static ArrayList<Filme> gerarLista(JSONObject json){
 

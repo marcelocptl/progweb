@@ -33,4 +33,6 @@ public abstract class DaoFactory {
     public abstract LogDao getLogDao();
     
     public abstract CommentDao getCommentDao();
+    
+    public abstract UserFilmsDao getUserFilmsDao();
 }
