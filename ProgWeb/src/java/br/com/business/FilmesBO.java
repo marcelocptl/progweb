@@ -3,6 +3,7 @@ package br.com.business;
 
 import br.com.Dao.UserFilmsDao;
 import br.com.jdbc.factory.JDBCDaoFactory;
+import br.com.model.Filme;
 import br.com.model.UserFilm;
 import java.util.ArrayList;
 
@@ -15,6 +16,15 @@ public class FilmesBO {
     
     private FilmesBO(){}
     
+    public static void checkMyFilmes(UserFilm userFilm){
+        userFilms.save(userFilm);
+    }  
+    public static void updateMyFilmes(UserFilm userFilm){
+        userFilms.update(userFilm);
+    }   
+    public static UserFilm verifyFilmes(int user_id, String imdb){
+        return userFilms.getByFilme(user_id, imdb);
+    }    
     public static ArrayList<UserFilm> meusFilmes(int user_id){
         return userFilms.getById(user_id);
     }
@@ -28,7 +38,7 @@ public class FilmesBO {
         return userFilms.getAssistidos(user_id);
     }
     public static ArrayList<UserFilm> melhorClassificado(){
-        return userFilms.melhoresFilmes();
+        return userFilms.melhoresFilmes("");
     }
     public static ArrayList<UserFilm> maisAssistidos(){
         return userFilms.getMaisVisto();
@@ -39,4 +49,7 @@ public class FilmesBO {
     public static ArrayList<UserFilm> maisFavoritados(){
         return userFilms.getMaisFavoritados();
     }
+    public static Filme getQtds(Filme filme){
+        return userFilms.getQtds(filme);
+    }    
 }

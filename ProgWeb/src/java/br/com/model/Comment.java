@@ -2,6 +2,7 @@ package br.com.model;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 
 public class Comment {
 
@@ -39,6 +40,15 @@ public class Comment {
     public Date getData() {       
         return data;
     }
+    
+    public String getFormatData() {
+        
+        String dataz = "dd/MM/yyyy";
+        SimpleDateFormat formatas = new SimpleDateFormat(dataz);
+        
+        return formatas.format(data);
+
+    }   
 
     public void setData(Date data) {
         this.data = data;
@@ -66,8 +76,6 @@ public class Comment {
 
     public void setTime(Time time) {
         this.time = time;
-    }
-    
-    
+    }      
 
 }

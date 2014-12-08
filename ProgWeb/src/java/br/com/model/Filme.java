@@ -3,7 +3,7 @@ package br.com.model;
 import java.util.ArrayList;
 
 public class Filme {
-    
+
     private String imdb_id;
     private String nome;
     private ArrayList<String> atores;
@@ -12,6 +12,11 @@ public class Filme {
     private String sinopse;
     private String lancamento;
     private String imagem;
+
+    private Integer qtdFav;
+    private Integer qtdPret;
+    private Integer qtdAss;
+    private float qtdNota;
 
     public Filme(String imdb_id, String nome, ArrayList<String> atores, ArrayList<String> diretores, ArrayList<String> generos, String sinopse, String lancamento, String imagem) {
         this.imdb_id = imdb_id;
@@ -32,13 +37,13 @@ public class Filme {
         this.generos = null;
         this.sinopse = null;
         this.lancamento = null;
-        this.imagem = null;        
-    }           
+        this.imagem = null;
+    }
 
     @Override
     public String toString() {
         return "Filme{" + "imdb_id=" + imdb_id + ", nome=" + nome + ", atores=" + atores + ", diretores=" + diretores + ", generos=" + generos + ", sinopse=" + sinopse + ", lancamento=" + lancamento + ", imagem=" + imagem + '}';
-    }        
+    }
 
     public String getId() {
         return imdb_id;
@@ -92,6 +97,14 @@ public class Filme {
         return lancamento;
     }
 
+    public String getFormatLancamento() {
+
+        String[] data = lancamento.split("-");
+
+        return data[2] + "/" + data[1] + "/" + data[0];
+
+    }
+
     public void setLancamento(String lancamento) {
         this.lancamento = lancamento;
     }
@@ -102,6 +115,38 @@ public class Filme {
 
     public void setImagem(String imagem) {
         this.imagem = imagem;
-    }        
-    
+    }
+
+    public Integer getQtdFav() {
+        return qtdFav;
+    }
+
+    public void setQtdFav(Integer qtdFav) {
+        this.qtdFav = qtdFav;
+    }
+
+    public Integer getQtdPret() {
+        return qtdPret;
+    }
+
+    public void setQtdPret(Integer qtdPret) {
+        this.qtdPret = qtdPret;
+    }
+
+    public Integer getQtdAss() {
+        return qtdAss;
+    }
+
+    public void setQtdAss(Integer qtdAss) {
+        this.qtdAss = qtdAss;
+    }
+
+    public float getQtdNota() {
+        return qtdNota;
+    }
+
+    public void setQtdNota(float qtdNota) {
+        this.qtdNota = qtdNota;
+    }
+
 }

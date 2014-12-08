@@ -6,6 +6,7 @@
 
 <!-- Film Recents -->
 
+<c:set var="count" value="0" scope="page" />
 <section>
 
     <div class="page-header">
@@ -13,17 +14,22 @@
     </div>
 
     <c:if test="${filmes != NULL}">
-    <div class="row">
-        
-        <c:forEach items="${filmes}" var="filme">
+    
+        <c:forEach items="${filmes}" var="filme" varStatus="loopCounter">
             <c:if test="${filme.getImagem() != NULL}">
-            <div class="col-lg-3">
-                <a href="FilmeController?action=view&id=${filme.getId()}"><img class="thumbnail" src="${ filme.getImagem() }"></a>
-            </div>    
+                <c:if test="${count % 4 == 0}">
+                <div class="row">
+                </c:if>
+                    <c:set var="count" value="${count + 1}" scope="page"/>
+                    <div class="col-lg-3">
+                        <a href="FilmeController?action=view&id=${filme.getId()}"><img class="thumbnail" src="${ filme.getImagem() }"></a>
+                    </div> 
+                <c:if test="${ (count % 4 == 0) || (loopCounter.count == filmes.size()) }">
+                </div>
+                </c:if>
             </c:if>
         </c:forEach>
         
-    </div>
     </c:if>
     
     <hr/>

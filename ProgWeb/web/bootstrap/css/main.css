@@ -19,6 +19,15 @@ p {
     text-align: justify;
 }
 
+.info-film-row {
+    padding: 8px;
+}
+
+.info-film {
+    text-align: right;
+    font-size: 18px;
+}
+
 section {
     padding: 30px;
     margin-bottom: 30px;

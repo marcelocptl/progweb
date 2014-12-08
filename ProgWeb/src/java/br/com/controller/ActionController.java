@@ -219,6 +219,8 @@ public class ActionController extends HttpServlet {
             Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        request.setAttribute("message", message);
+        
         request.setAttribute("pageContent", forward);
 
         RequestDispatcher view = request.getRequestDispatcher("/index.jsp");

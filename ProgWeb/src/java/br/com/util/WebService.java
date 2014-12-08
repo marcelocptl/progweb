@@ -1,5 +1,6 @@
 package br.com.util;
 
+import br.com.business.FilmesBO;
 import br.com.model.Filme;
 import br.com.model.UserFilm;
 import java.io.BufferedReader;
@@ -8,7 +9,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +41,52 @@ public class WebService {
         
         try {
             return gerarLista(new JSONObject(openURL(url)));
-        } catch (IOException ex) {
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+        
+        return null;
+    }    
+
+    public static ArrayList<Filme> getFilmGender(String id){
+        String url = "http://filmssensors.esy.es/webservice/filmes.php?genero="+id;
+        
+        try {                       
+            return gerarLista(new JSONObject(openURL(url)));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        
+        return null;
+    }    
+    
+    public static ArrayList getAllGender(){
+        String url = "http://filmssensors.esy.es/webservice/genero.php";
+        
+        try {
+            String json = openURL(url);
+            
+            JSONObject jsonObj = new JSONObject(json);
+            
+            Iterator<String> itr = jsonObj.keys();
+
+            ArrayList list = new ArrayList();        
+            
+            while (itr.hasNext()) {
+                
+                String key = itr.next();
+                
+                Map item = new HashMap();
+                item.put("id", key);
+                item.put("name", jsonObj.getString(key));
+                
+                list.add(item);                    
+                
+            }
+            
+            return list;
+            
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
         
@@ -52,7 +100,7 @@ public class WebService {
             ArrayList<Filme> list = gerarLista(new JSONObject(openURL(url)));
             
             return list.get(0);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
         
@@ -67,7 +115,7 @@ public class WebService {
             
             return gerarLista(new JSONObject(openURL(url)));
             
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             
             System.err.println(ex.getMessage());
             
@@ -81,9 +129,13 @@ public class WebService {
         String url = "http://filmssensors.esy.es/webservice/filmes.php?lancamento=2014";
         
         try {
+            
             return gerarLista(new JSONObject(openURL(url)));
-        } catch (IOException ex) {
+            
+        } catch (Exception ex) {
+            
             System.err.println(ex.getMessage());
+            
         }
         
         return null;
@@ -110,6 +162,7 @@ public class WebService {
             JSONObject filmesJSON = json.getJSONObject(aux);
             
             Filme filme = new Filme();
+            
             try {
                 filme.setId(aux);
             } catch (JSONException e) {}
@@ -140,18 +193,20 @@ public class WebService {
                     
                     JSONObject jsonObject2 = jsonArray.getJSONObject(j);
                     
-                    String nome = jsonObject2.getString("Nome");
+                    String nome = jsonObject2.getString("Ator");
                     String personagem = jsonObject2.getString("Personagem");
                     
-                    if (nome == null && personagem != null) nome = personagem;
+                    if ( (nome == null && nome.isEmpty()) && (personagem != null && !personagem.isEmpty()) ) 
+                        nome = personagem;
                     else
-                        if (personagem != null && personagem.isEmpty()) nome += " ("+ personagem +")";
+                        if (personagem != null && !personagem.isEmpty()) nome += " ("+ personagem +")";
                     
                     stringList.add(nome);                    
                     
                 }                
                 
                 filme.setAtores(stringList);
+                                
             } catch (JSONException e) {}
             
             try {
@@ -190,7 +245,7 @@ public class WebService {
                 
             } catch (JSONException e) {}            
             
-            filmes.add(filme);         
+            filmes.add(FilmesBO.getQtds(filme));         
             
         }        
         

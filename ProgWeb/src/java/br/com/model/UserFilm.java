@@ -10,13 +10,26 @@ package br.com.model;
  * @author brucce
  */
 public class UserFilm {
-    
+
     private int user_id;
     private String imdb_id;
     private boolean favorito;
     private boolean pretende_ver;
     private boolean assistiu;
     private Integer nota;
+    private float media;
+
+
+    public UserFilm() {
+        this.favorito = false;
+        this.pretende_ver = false;
+        this.assistiu = false;
+    }
+
+    @Override
+    public String toString() {
+        return "favorito=" + favorito + ", pretende_ver=" + pretende_ver + ", assistiu=" + assistiu + ", nota=" + nota;
+    }
 
     public int getUser_id() {
         return user_id;
@@ -65,4 +78,13 @@ public class UserFilm {
     public void setNota(Integer nota) {
         this.nota = nota;
     }
+
+    public float getMedia() {
+        return media;
+    }
+
+    public void setMedia(float media) {
+        this.media = media;
+    }        
+
 }

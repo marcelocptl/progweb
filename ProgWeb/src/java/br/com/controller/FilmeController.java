@@ -1,6 +1,5 @@
 package br.com.controller;
 
-import br.com.Dao.UserFilmsDao;
 import br.com.business.CommentBO;
 import br.com.business.FilmesBO;
 import br.com.business.UserBO;
@@ -15,6 +14,7 @@ import br.com.util.Message;
 import br.com.util.WebService;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
@@ -52,14 +52,42 @@ public class FilmeController extends HttpServlet {
         String id = request.getParameter("id");
 
         switch (action) {
+
             case "recentes":
-                forward = SEARCH;
+                forward = LIST;
                 request.setAttribute("filmes", WebService.recents());
                 break;
 
-            case "melhores":
+            case "generos":
+
                 forward = LIST;
-                request.setAttribute("filmes", WebService.findFilms(FilmesBO.melhorClassificado()));
+
+                ArrayList<Map> generos = WebService.getAllGender();
+
+                String genderId = request.getParameter("genderId") != null ? request.getParameter("genderId") : null;
+                String genderName = null;
+
+                if (genderId == null || genderId.isEmpty()) {
+
+                    genderId = generos.get(9).get("id").toString();
+                    genderName = generos.get(9).get("name").toString();
+
+                } else {
+
+                    for (Map genero : generos) {
+                        String aux = genero.get("id").toString();
+
+                        if (aux.equals(genderId)) {
+                            genderName = genero.get("name").toString();
+                        }
+                    }
+
+                }
+
+                request.setAttribute("generos", generos);
+                request.setAttribute("filmes", WebService.getFilmGender(genderId));
+                request.setAttribute("title", genderName);
+
                 break;
 
             case "list":
@@ -73,7 +101,7 @@ public class FilmeController extends HttpServlet {
                 break;
 
             case "delete":
-                if (_permissions.check(_user.getProfile(), MODULE, action)) {
+                if (_permissions != null && _permissions.check(_user.getProfile(), MODULE, action)) {
                     id = request.getParameter("id");
                     String userId = request.getParameter("user");
                     String date = request.getParameter("date");
@@ -88,10 +116,20 @@ public class FilmeController extends HttpServlet {
 
             case "view":
                 forward = VIEW;
+                Filme filme = WebService.getFilm(id);
                 request.setAttribute("comments", commentBO.list(id));
-                request.setAttribute("filme", WebService.getFilm(id));
+                request.setAttribute("filme", filme);
+                
+                if (_permissions != null && _permissions.check(_user.getProfile(), MODULE, "check"))
+                    request.setAttribute("checks", FilmesBO.verifyFilmes(_user.getId(), id));
+                
                 break;
 
+            case "melhores":
+                forward = LIST;
+                request.setAttribute("filmes", WebService.findFilms(FilmesBO.melhorClassificado()));
+                break;                
+                
             case "favoritos":
                 forward = LIST;
                 request.setAttribute("filmes", WebService.findFilms(FilmesBO.maisFavoritados()));
@@ -105,25 +143,57 @@ public class FilmeController extends HttpServlet {
                 forward = LIST;
                 request.setAttribute("filmes", WebService.findFilms(FilmesBO.maisAssistidos()));
                 break;
-                
+
             case "myfavoritos":
-                forward = LIST;
-                request.setAttribute("filmes", WebService.findFilms(FilmesBO.meusFavoritos(_user.getId())));
+
+                if (_permissions != null && _permissions.check(_user.getProfile(), MODULE, "check")) {
+
+                    forward = LIST;
+                    request.setAttribute("filmes", WebService.findFilms(FilmesBO.meusFavoritos(_user.getId())));
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [check] no modulo [" + MODULE + "].");
+                }
+
                 break;
 
             case "mypretendidos":
-                forward = LIST;
-                request.setAttribute("filmes", WebService.findFilms(FilmesBO.meusFilmesPretendidos(_user.getId())));
+
+                if (_permissions != null && _permissions.check(_user.getProfile(), MODULE, "check")) {
+
+                    forward = LIST;
+                    request.setAttribute("filmes", WebService.findFilms(FilmesBO.meusFilmesPretendidos(_user.getId())));
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [check] no modulo [" + MODULE + "].");
+                }
+
                 break;
 
             case "myassistidos":
-                forward = LIST;
-                request.setAttribute("filmes", WebService.findFilms(FilmesBO.FilmesAssisti(_user.getId())));
+
+                if (_permissions != null && _permissions.check(_user.getProfile(), MODULE, "check")) {
+
+                    forward = LIST;
+                    request.setAttribute("filmes", WebService.findFilms(FilmesBO.FilmesAssisti(_user.getId())));
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [check] no modulo [" + MODULE + "].");
+                }
+
                 break;
 
             case "myfilmes":
-                forward = LIST;
-                request.setAttribute("filmes", WebService.findFilms(FilmesBO.meusFilmes(_user.getId())));
+
+                if (_permissions != null && _permissions.check(_user.getProfile(), MODULE, "check")) {
+
+                    forward = LIST;
+                    request.setAttribute("filmes", WebService.findFilms(FilmesBO.meusFilmes(_user.getId())));
+
+                } else {
+                    message.addWarning("Você não tem permissão de acessar a ação [check] no modulo [" + MODULE + "].");
+                }
+
                 break;
         }
 
@@ -149,6 +219,8 @@ public class FilmeController extends HttpServlet {
         String forward = null;
         String action = request.getParameter("action");
 
+        CommentBO commentBO = new CommentBO();
+        
         try {
             switch (action) {
                 case "comment":
@@ -159,18 +231,68 @@ public class FilmeController extends HttpServlet {
                         if (comment == null || comment.isEmpty()) {
                             message.addWarning("Nenhum comentário informado!");
                         } else {
-                            CommentBO commentBO = new CommentBO();
+                            
                             commentBO.save(new Comment(id, _user, comment));
                             Filme filme = WebService.getFilm(id);
                             LogRegister.singleton().toLog(MODULE, action, "Usuário comentou [" + filme.getNome() + "].", _user.getId());
                             forward = VIEW;
                             request.setAttribute("comments", commentBO.list(id));
-                            request.setAttribute("filme", WebService.getFilm(id));
+                            request.setAttribute("filme", filme);
+                            request.setAttribute("checks", FilmesBO.verifyFilmes(_user.getId(), id));
                         }
                     } else {
                         message.addWarning("Você não tem permissão de acessar a ação [" + action + "] no modulo [" + MODULE + "].");
                     }
                     break;
+
+                case "check":
+
+                    if (_permissions.check(_user.getProfile(), MODULE, "check")) {
+
+                        String imdb = request.getParameter("imdb") != null ? request.getParameter("imdb") : null;
+                        
+                        if (imdb == null || imdb.isEmpty()) return;
+                        
+                        boolean favorito = request.getParameter("favorito") != null;
+                        boolean pretendido = request.getParameter("pretendido") != null;
+                        boolean assistido = request.getParameter("assistido") != null;
+                        String nota = request.getParameter("nota") != null ? request.getParameter("nota") : null;
+
+                        int aux = Integer.parseInt(nota);
+                        
+                        UserFilm uf = new UserFilm();
+                        uf.setUser_id(_user.getId());
+                        uf.setImde_id(imdb);
+                        uf.setFavorito(favorito);
+                        uf.setPretende_ver(pretendido);
+                        uf.setAssistiu(assistido);
+                        
+                        if (aux < 1 || aux > 10)
+                            uf.setNota(null);
+                        else
+                            uf.setNota(aux);
+
+                        if (FilmesBO.verifyFilmes(uf.getUser_id(), uf.getImde_id()) == null) {
+                            FilmesBO.checkMyFilmes(uf);
+                        } else {
+                            FilmesBO.updateMyFilmes(uf);
+                        }
+
+                        message.addMessage("Classificação realizada com sucesso!");
+                        
+                        Filme filme = WebService.getFilm(imdb);
+                        LogRegister.singleton().toLog(MODULE, action, filme.getNome()+" [" + uf + "].", _user.getId());
+                        forward = VIEW;
+                        request.setAttribute("comments", commentBO.list(imdb));
+                        request.setAttribute("filme", filme);
+                        request.setAttribute("checks", FilmesBO.verifyFilmes(_user.getId(), imdb));
+
+                    } else {
+                        message.addWarning("Você não tem permissão de acessar a ação [check] no modulo [" + MODULE + "].");
+                    }
+
+                    break;
+
             }
         } catch (Exception ex) {
             Logger.getLogger(FilmeController.class.getName()).log(Level.SEVERE, null, ex);

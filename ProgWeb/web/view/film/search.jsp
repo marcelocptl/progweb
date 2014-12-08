@@ -30,8 +30,26 @@
             <div class="col-lg-10">
                 <h2><a href="FilmeController?action=view&id=${filme.getId()}">${filme.getNome()}</a></h2>
                 <p>
-                    <i class="glyphicon glyphicon-calendar"></i> ${filme.getLancamento()}
-                    <br/>
+
+                    <i class="glyphicon glyphicon-calendar"></i> ${filme.getFormatLancamento()} &nbsp;&nbsp;
+
+                    <c:if test="${filme.getQtdFav() != NULL}">
+                        <i class="glyphicon glyphicon-star-empty"></i> ${filme.getQtdFav()} &nbsp;&nbsp;
+                    </c:if>  
+
+                    <c:if test="${filme.getQtdPret() != NULL}">
+                        <i class="glyphicon glyphicon-play"></i> ${filme.getQtdPret()} &nbsp;&nbsp;
+                    </c:if> 
+
+                    <c:if test="${filme.getQtdAss() != NULL}">
+                        <i class="glyphicon glyphicon-eye-open"></i> ${filme.getQtdAss()} &nbsp;&nbsp;
+                    </c:if> 
+
+                    <c:if test="${filme.getQtdNota() != NULL}">
+                        <i class="glyphicon glyphicon-stats"></i> ${filme.getQtdNota()}
+                    </c:if> 
+ 
+                    <br/><br/>
                     ${filme.getSinopse()}
                 </p>
                 
